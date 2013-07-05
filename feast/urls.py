@@ -6,7 +6,8 @@ from django.conf.urls import patterns, include, url
 
 urlpatterns = patterns('',
     # Examples:
-    # url(r'^$', 'feast.views.home', name='home'),
+    url(r'^$', 'scrapers.views.home'),
+    url(r'^album_ajax/$', 'scrapers.views.get_album_tracks'),
     # url(r'^feast/', include('feast.foo.urls')),
 
     # Uncomment the admin/doc line below to enable admin documentation:

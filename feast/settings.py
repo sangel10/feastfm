@@ -1,5 +1,8 @@
 # Django settings for feast project.
 
+import os
+#ROOT_PATH = os.path.dirname(__file__)
+ROOT_PATH = os.path.abspath(os.path.curdir)
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
@@ -13,13 +16,26 @@ MANAGERS = ADMINS
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
-        'NAME': 'feast',                      # Or path to database file if using sqlite3.
-        'USER': 'Santi',                      # Not used with sqlite3.
-        'PASSWORD': 'psqlpass',                  # Not used with sqlite3.
+        'NAME': 'musicbrainz',                      # Or path to database file if using sqlite3.
+        'USER': 'musicbrainz',                      # Not used with sqlite3.
+        'PASSWORD': '',                  # Not used with sqlite3.
         'HOST': 'localhost',                      # Set to empty string for localhost. Not used with sqlite3.
         'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
     }
 }
+
+#scrapers DB
+
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.postgresql_psycopg2', # Add 'postgresql_psycopg2', 'mysql', 'sqlite3' or 'oracle'.
+    #     'NAME': 'feast',                      # Or path to database file if using sqlite3.
+    #     'USER': 'Santi',                      # Not used with sqlite3.
+    #     'PASSWORD': 'psqlpass',                  # Not used with sqlite3.
+    #     'HOST': 'localhost',                      # Set to empty string for localhost. Not used with sqlite3.
+    #     'PORT': '',                      # Set to empty string for default. Not used with sqlite3.
+    # }
+
+
 
 # Local time zone for this installation. Choices can be found here:
 # http://en.wikipedia.org/wiki/List_of_tz_zones_by_name
@@ -104,6 +120,7 @@ ROOT_URLCONF = 'feast.urls'
 WSGI_APPLICATION = 'feast.wsgi.application'
 
 TEMPLATE_DIRS = (
+     os.path.join(ROOT_PATH, 'templates'),
     # Put strings here, like "/home/html/django_templates" or "C:/www/django/templates".
     # Always use forward slashes, even on Windows.
     # Don't forget to use absolute paths, not relative paths.
@@ -125,6 +142,7 @@ INSTALLED_APPS = (
     'djcelery',
     'celerytest',
     'south',
+    'musicbrainz',
 )
 
 BROKER_URL = "django://" # tell kombu to use the Django database as the message queue  

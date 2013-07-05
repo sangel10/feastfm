@@ -11,35 +11,17 @@ class Migration(SchemaMigration):
         # Adding model 'Sound'
         db.create_table('scrapers_sound', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('title', self.gf('django.db.models.fields.CharField')(max_length=500, blank=True)),
             ('original_slug', self.gf('django.db.models.fields.CharField')(max_length=500)),
-            ('yt_track_id', self.gf('django.db.models.fields.CharField')(unique=True, max_length=500, blank=True)),
-            ('sc_track_id', self.gf('django.db.models.fields.CharField')(unique=True, max_length=500, blank=True)),
-            ('vimeo_track_id', self.gf('django.db.models.fields.CharField')(unique=True, max_length=500, blank=True)),
+            ('title', self.gf('django.db.models.fields.CharField')(max_length=500, blank=True)),
+            ('yt_track_id', self.gf('django.db.models.fields.CharField')(max_length=500, blank=True)),
+            ('sc_track_id', self.gf('django.db.models.fields.CharField')(max_length=500, blank=True)),
+            ('vimeo_track_id', self.gf('django.db.models.fields.CharField')(max_length=500, blank=True)),
             ('sc_username', self.gf('django.db.models.fields.CharField')(max_length=500, blank=True)),
             ('sc_full_name', self.gf('django.db.models.fields.CharField')(max_length=500, blank=True)),
             ('vimeo_username', self.gf('django.db.models.fields.CharField')(max_length=500, blank=True)),
-            ('sc_release', self.gf('django.db.models.fields.CharField')(max_length=500, blank=True)),
-            ('sc_label', self.gf('django.db.models.fields.CharField')(max_length=500, blank=True)),
-            ('first_appeared', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True)),
-            ('DJ_set', self.gf('django.db.models.fields.BooleanField')(default=False)),
-            ('tracklist', self.gf('django.db.models.fields.TextField')(blank=True)),
-            ('original_tracklist', self.gf('django.db.models.fields.TextField')(blank=True)),
-            ('mix_series', self.gf('django.db.models.fields.CharField')(max_length=1000, blank=True)),
-            ('mix_series_number', self.gf('django.db.models.fields.IntegerField')(null=True, blank=True)),
-            ('discogs_id', self.gf('django.db.models.fields.CharField')(max_length=500, blank=True)),
-            ('release_number', self.gf('django.db.models.fields.CharField')(max_length=500, blank=True)),
             ('length', self.gf('django.db.models.fields.IntegerField')(null=True, blank=True)),
         ))
         db.send_create_signal('scrapers', ['Sound'])
-
-        # Adding M2M table for field tracklist_models on 'Sound'
-        db.create_table('scrapers_sound_tracklist_models', (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('from_sound', models.ForeignKey(orm['scrapers.sound'], null=False)),
-            ('to_sound', models.ForeignKey(orm['scrapers.sound'], null=False))
-        ))
-        db.create_unique('scrapers_sound_tracklist_models', ['from_sound_id', 'to_sound_id'])
 
         # Adding M2M table for field sound_duplicates on 'Sound'
         db.create_table('scrapers_sound_sound_duplicates', (
@@ -69,10 +51,9 @@ class Migration(SchemaMigration):
         db.create_table('scrapers_playlist', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('name', self.gf('django.db.models.fields.TextField')(blank=True)),
-            ('sc_playlist_id', self.gf('django.db.models.fields.CharField')(unique=True, max_length=500, blank=True)),
-            ('yt_playlist_id', self.gf('django.db.models.fields.CharField')(unique=True, max_length=500, blank=True)),
-            ('vimeo_playlist_id', self.gf('django.db.models.fields.CharField')(unique=True, max_length=500, blank=True)),
-            ('tracklist', self.gf('django.db.models.fields.TextField')()),
+            ('sc_playlist_id', self.gf('django.db.models.fields.CharField')(max_length=500, blank=True)),
+            ('yt_playlist_id', self.gf('django.db.models.fields.CharField')(max_length=500, blank=True)),
+            ('vimeo_playlist_id', self.gf('django.db.models.fields.CharField')(max_length=500, blank=True)),
         ))
         db.send_create_signal('scrapers', ['Playlist'])
 
@@ -87,7 +68,7 @@ class Migration(SchemaMigration):
         # Adding model 'Post'
         db.create_table('scrapers_post', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('post_url', self.gf('django.db.models.fields.TextField')(unique=True)),
+            ('post_url', self.gf('django.db.models.fields.TextField')()),
             ('source', self.gf('django.db.models.fields.related.ForeignKey')(related_name='posts', to=orm['scrapers.Source'])),
             ('date_posted', self.gf('django.db.models.fields.DateTimeField')(null=True, blank=True)),
         ))
@@ -200,9 +181,6 @@ class Migration(SchemaMigration):
         # Deleting model 'Sound'
         db.delete_table('scrapers_sound')
 
-        # Removing M2M table for field tracklist_models on 'Sound'
-        db.delete_table('scrapers_sound_tracklist_models')
-
         # Removing M2M table for field sound_duplicates on 'Sound'
         db.delete_table('scrapers_sound_sound_duplicates')
 
@@ -285,45 +263,33 @@ class Migration(SchemaMigration):
             'Meta': {'object_name': 'Playlist'},
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            'sc_playlist_id': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '500', 'blank': 'True'}),
+            'sc_playlist_id': ('django.db.models.fields.CharField', [], {'max_length': '500', 'blank': 'True'}),
             'sounds': ('django.db.models.fields.related.ManyToManyField', [], {'related_name': "'playlists'", 'symmetrical': 'False', 'to': "orm['scrapers.Sound']"}),
-            'tracklist': ('django.db.models.fields.TextField', [], {}),
-            'vimeo_playlist_id': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '500', 'blank': 'True'}),
-            'yt_playlist_id': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '500', 'blank': 'True'})
+            'vimeo_playlist_id': ('django.db.models.fields.CharField', [], {'max_length': '500', 'blank': 'True'}),
+            'yt_playlist_id': ('django.db.models.fields.CharField', [], {'max_length': '500', 'blank': 'True'})
         },
         'scrapers.post': {
             'Meta': {'object_name': 'Post'},
             'date_posted': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'playlist': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'posts'", 'blank': 'True', 'to': "orm['scrapers.Playlist']"}),
-            'post_url': ('django.db.models.fields.TextField', [], {'unique': 'True'}),
+            'post_url': ('django.db.models.fields.TextField', [], {}),
             'sound': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'posts'", 'blank': 'True', 'to': "orm['scrapers.Sound']"}),
             'source': ('django.db.models.fields.related.ForeignKey', [], {'related_name': "'posts'", 'to': "orm['scrapers.Source']"})
         },
         'scrapers.sound': {
-            'DJ_set': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'Meta': {'object_name': 'Sound'},
-            'discogs_id': ('django.db.models.fields.CharField', [], {'max_length': '500', 'blank': 'True'}),
-            'first_appeared': ('django.db.models.fields.DateTimeField', [], {'null': 'True', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'length': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
-            'mix_series': ('django.db.models.fields.CharField', [], {'max_length': '1000', 'blank': 'True'}),
-            'mix_series_number': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
             'original_slug': ('django.db.models.fields.CharField', [], {'max_length': '500'}),
-            'original_tracklist': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            'release_number': ('django.db.models.fields.CharField', [], {'max_length': '500', 'blank': 'True'}),
             'sc_full_name': ('django.db.models.fields.CharField', [], {'max_length': '500', 'blank': 'True'}),
-            'sc_label': ('django.db.models.fields.CharField', [], {'max_length': '500', 'blank': 'True'}),
-            'sc_release': ('django.db.models.fields.CharField', [], {'max_length': '500', 'blank': 'True'}),
-            'sc_track_id': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '500', 'blank': 'True'}),
+            'sc_track_id': ('django.db.models.fields.CharField', [], {'max_length': '500', 'blank': 'True'}),
             'sc_username': ('django.db.models.fields.CharField', [], {'max_length': '500', 'blank': 'True'}),
             'sound_duplicates': ('django.db.models.fields.related.ManyToManyField', [], {'related_name': "'sound_duplicates_rel_+'", 'blank': 'True', 'to': "orm['scrapers.Sound']"}),
             'title': ('django.db.models.fields.CharField', [], {'max_length': '500', 'blank': 'True'}),
-            'tracklist': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
-            'tracklist_models': ('django.db.models.fields.related.ManyToManyField', [], {'related_name': "'tracklist_models_rel_+'", 'blank': 'True', 'to': "orm['scrapers.Sound']"}),
-            'vimeo_track_id': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '500', 'blank': 'True'}),
+            'vimeo_track_id': ('django.db.models.fields.CharField', [], {'max_length': '500', 'blank': 'True'}),
             'vimeo_username': ('django.db.models.fields.CharField', [], {'max_length': '500', 'blank': 'True'}),
-            'yt_track_id': ('django.db.models.fields.CharField', [], {'unique': 'True', 'max_length': '500', 'blank': 'True'})
+            'yt_track_id': ('django.db.models.fields.CharField', [], {'max_length': '500', 'blank': 'True'})
         },
         'scrapers.source': {
             'Meta': {'object_name': 'Source'},

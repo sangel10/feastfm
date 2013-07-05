@@ -1,0 +1,205 @@
+ 
+<script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js" ></script> 
+<script src="http://toma.hk/api.js" type= "text/javascript"></script>
+
+<!-- <script type="text/javascript" src="media/jquery-1.9.1.min.js"></script>
+ -->
+
+
+
+<style>
+.album{
+	font-weight:bold;
+}
+.album-track{
+	padding-left:30px;
+	font-weight:normal;
+}
+
+ul, li {
+    list-style-type: none;
+} 
+</style>
+
+<div id="player">
+</div>
+
+
+{% if releases %}
+
+<ul> Releases:
+{% for release in releases %}
+    <ul data-reid = "{{release.reid}}" data-artist ="{{ release.artist }}" data-title ="{{release.title}}" class = "album" >{{ release.artist }} - {{release.title}}</ul>
+{% endfor %}
+
+</ul>
+
+
+{% else %}
+
+<form action="" method="get">
+{% csrf_token %}
+Last.FM Username: <input type="text" id = "username" name = "username">
+<input type="submit" value="Get albums" />
+</form>
+
+
+{% endif %}
+
+{% if artists %}
+
+<ul> Artists:
+{% for artist in artists %}
+    <li>{{ artist }}</li>
+{% endfor %}
+</ul>
+
+{% endif %}
+
+
+<script>
+
+$(document).ready(function() {
+
+// $("ul ul").click(function(this){
+// 	alert(this);
+// };
+
+function addslashes( str ) {
+    return (str + '').replace(/[\\"']/g, '\\$&').replace(/\u0000/g, '\\0');
+}
+
+var currentTrack;
+
+$('ul.album').click(function(e){
+	var $target = $(e.target);
+    if(!$target.is("ul")) //magic happens here!!
+        {
+            return;
+        }
+	if($(this).children().length >= 1){
+		$(this).children().toggle();
+	}
+	else{
+	    var reid = $(this).data('reid');
+	    ul = this;
+	    //var data = {"reid": reid};
+	    // var args = { type:"GET", url:"/album/", data:data, complete:done };
+	    // $.ajax(args);
+	    $.getJSON("/album_ajax/", {"reid": reid}, function(json){
+	    if(json['tracks']){
+	    	//alert("json?: " + json["tracks"]+" reid: "+json['reid']);
+	    	// var album = $('data-reid ='+)
+	    	for(var i=0; i<json['tracks'].length; i++){
+	    		//console.log(json['tracks'][i]['title'])
+	    		artist = json['tracks'][i]['artist']
+	    		title = json['tracks'][i]['title']
+	    		$(ul).append("<li class = 'album-track track' data-artist = '"+escape(artist) +"' data-title ='" + escape(title) +"'>"+artist +" - "+ title+"</li>");
+	    	}
+   		
+   		}
+		else{
+			alert('no results')
+		}
+		})
+	}
+});
+
+$(document).on('click', ".album-track", function() {
+	var artist = $(this).data('artist');
+	var title = $(this).data('title');
+	// alert(artist + " - "+title);
+	// renderTrack(artist, title);
+	play(this);
+	// alert("you clicked a track");
+});
+
+function getNextElement(currElement, className){
+    var elements = $('.' + className);
+    var currentIndex = elements.index(currElement);
+    return elements[currentIndex + 1];
+}
+
+function play(element) {
+	currentTrack = element;
+	var artist = $(element).data('artist');
+	var title = $(element).data('title');
+	renderTrack(artist, title);
+	// alert("play function rendered ");
+}
+
+var track;
+var playerEl = document.getElementById("player");
+renderTrack = function(artist, title){
+    var title = title;
+    var artist = artist;
+    var width = 200;
+    var height = 200;
+
+    var disabled0 = undefined;
+    var disabled1 = undefined;
+
+    playerEl.innerHTML = "";
+
+
+    track = window.tomahkAPI.Track(title,artist, {
+        width:width,
+        height:height,
+        disabledResolvers: [ disabled0, disabled1 ],
+        handlers: {
+            onloaded: function() {
+                console.log(track.connection+":\n  api loaded");
+                hasResolved = false;
+                setTimeout(function(){
+                    console.log("Out of patience.")
+                    if(!hasResolved)
+                        //play($(currentTrack).next(".track"));
+                    	play(getNextElement(currentTrack, "track"));
+                }
+                ,5000);
+            },
+            onended: function() {
+                console.log(track.connection+":\n  Song ended: "+track.artist+" - "+track.title);
+                //play($(currentTrack).next("li.track"));
+                play(getNextElement(currentTrack, "track"));
+            },
+            onplayable: function() {
+                console.log(track.connection+":\n  playable");
+                track.play();
+            },
+            onresolved: function(resolver, result) {
+                hasResolved = true;
+                //track.play();
+                console.log(track.connection+":\n  Track found: <b>"+resolver+"</b> - "+ result.track + " by "+result.artist);
+            },
+            ontimeupdate: function(timeupdate) {
+                /*
+                var currentTime = timeupdate.currentTime;
+                var duration = timeupdate.duration;
+                currentTime = parseInt(currentTime);
+                duration = parseInt(duration);
+*/
+                //console.log(track.connection+":\n  Time update: "+currentTime + " "+duration);
+            }  
+        }
+    });
+
+    playerEl.appendChild(track.render());
+}
+
+
+
+})
+
+
+
+
+</script>
+<!-- 
+<form name="username"  action=# method="get" onsubmit="getartists()">
+Last.FM Username: <input type="text" id = "username" >
+<input type="submit" value="Submit" >
+</form>
+
+ -->
+

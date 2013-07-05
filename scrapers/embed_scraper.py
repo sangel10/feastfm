@@ -97,7 +97,7 @@ def process_vimeo_track(track_data):
 	username = track_data[0]["user_name"]
 	vimeo_track_id = track_data[0]["id"]
 	length = track_data[0]["duration"]
-	track_dict = {"title":title, "vimeo_username":username, "vimeo_track_id":vimeo_track_id, "length":length}
+	track_dict = {"title":title, "vimeo_username":username, "vimeo_track_id":vimeo_track_id, "length":length, "type":"vimeo"}
 	return track_dict
 
 
@@ -130,7 +130,7 @@ def process_SC_track(track_data):
 	label = track_data["label_name"]
 	length = track_data["duration"]
 	#
-	track_dict = {"title": title, "sc_track_id": soundcloud_track_id, "sc_release":release, "sc_label":label, "length":length}
+	track_dict = {"title": title, "sc_track_id": soundcloud_track_id, "sc_release":release, "sc_label":label, "length":length,"type":"sc"}
 	#track_dict = {"title": title, "track_id": track_id}
 	user_data = get_SC_user(user_id)
 	track_dict.update(user_data)
@@ -144,7 +144,7 @@ def process_SC_playlist(playlist_data):
 	for track in playlist_data["tracks"]:
 		track_id = track["id"]
 		tracklist.append(track_id)
-	return {"sc_playlist_id": SC_playlist_id, "tracklist":tracklist}
+	return {"sc_playlist_id": SC_playlist_id, "tracklist":tracklist, "type":"sc"}
 	# processed_playlist = {"SC_playlist_id":SC_playlist_id, "tracklist":tracklist}
 	# return processed_playlist
 
@@ -203,7 +203,7 @@ def process_YT_track(entry):
 	title = entry["title"]["$t"]
 	length = entry['media$group']['yt$duration']['seconds']
 	YT_track_id = entry["media$group"]["yt$videoid"]["$t"]
-	track_dict = {"title":title, "length":length, "yt_track_id":YT_track_id}
+	track_dict = {"title":title, "length":length, "yt_track_id":YT_track_id, "type":"yt"}
 	return track_dict
 
 def process_YT_playlist(playlist_data):
@@ -213,7 +213,7 @@ def process_YT_playlist(playlist_data):
 	for entry in playlist_data["feed"]["entry"]:
 		track_id = entry["media$group"]["yt$videoid"]["$t"]
 		tracklist.append(track_id)
-	processed_playlist = {"yt_playlist_id":YT_playlist_id,"tracklist":tracklist}
+	processed_playlist = {"yt_playlist_id":YT_playlist_id,"tracklist":tracklist, "type":"yt"}
 	return processed_playlist
 
 def get_YT_playlist(playlist_id):
@@ -316,7 +316,6 @@ feeds = [factmag, LWE, xlr8r, mthrfnkr, pitchfork_tracks, pitchfork_best_tracks]
 
 def scrape_feed(site):
 	print inspect.stack()[0][3]
-	print __name__
 	results = {"tracks":[],"playlists":[]}
 	feed = feedparser.parse(site)
 	source = feed.feed.link
@@ -373,46 +372,80 @@ def get_RSS_json(entry):
 
 
 
-
-# from scrapers.embed_scraper import *
-# from scrapers.models import *
-# results = scrape_all([factmag])
-# track = results["tracks"][0]
-# source = track["source"]
-# url = track["url"]
-# original_slug = track["title"]
-# s = Source(url = source)
-# s.save()
-# sound = Sound(original_slug = original_slug)
-# sound.save()
-
-
-
 def save_track(track):
-	source_name = track.pop("source")
-	url = track.pop("url")
-	original_slug = track.pop("title")
-	date_published = track.pop("published")
-	if len(Source.objects.filter(url=source)) > 0:
-		source_entry = Source.objects.get(url=source)
+	track_type = track["type"]
+	source_url = track["source"]
+	post_url = track["url"]
+	original_slug = track["title"]
+	length = track["length"]
+	date = track["published"]
+	date = datetime.fromtimestamp(mktime(date))
+	if Source.objects.filter(url=source_url):
+		source = Source.objects.filter(url=source_url)[0]
 	else:
-		source_entry = Source(url = url)
-		source_entry.save()
-	track_entry = Sound(original_slug = original_slug)
+		source = Source(url = source_url)
+		source.save()
+	if Post.objects.filter(post_url = post_url, date_posted = date):
+		post = Post.objects.filter(post_url=post_url)[0]
+	else:
+		post = Post(post_url = post_url, date_posted = date)
+		post.save()
+	if track_type == "sc":
+		sc_track_id = track["sc_track_id"]
+		if Sound.objects.filter(sc_track_id = sc_track_id):
+			sound = Sound.objects.filter(sc_track_id = sc_track_id)[0]
+		else:
+			sound = Sound(sc_track_id = sc_track_id, original_slug = original_slug, sc_username = track["sc_username"], sc_full_name = track["sc_full_name"])
+			sound.save()
+	if track_type == "yt":
+		yt_track_id = track["yt_track_id"]
+		if Sound.objects.filter(yt_track_id = yt_track_id):
+			sound = Sound.objects.filter(yt_track_id = yt_track_id)[0]
+		else:
+			sound = Sound(yt_track_id = yt_track_id, original_slug = original_slug)
+			sound.save()
+	if track_type == "vimeo":
+		vimeo_track_id = track["vimeo_track_id"]
+		if Sound.objects.filter(vimeo_track_id = vimeo_track_id):
+			sound = Sound.objects.filter(vimeo_track_id = vimeo_track_id)[0]
+		else:
+			sound = Sound(vimeo_track_id = vimeo_track_id, original_slug = original_slug, vimeo_username = track["vimeo_username"])
+			sound.save()
+	# for k in track:
+	# 	sound.k = track[k]
+	sound.save()
+	sound.posts.add(post)
+	sound.source.add(source)
+	sound.save()
+	source.posts.add(post)
+	source.save()
+	return source,post,sound
+
+# def save_track(track):
+# 	source_name = track.pop("source")
+# 	url = track.pop("url")
+# 	original_slug = track.pop("title")
+# 	date_published = track.pop("published")
+# 	if len(Source.objects.filter(url=source)) > 0:
+# 		source_entry = Source.objects.get(url=source)
+# 	else:
+# 		source_entry = Source(url = url)
+# 		source_entry.save()
+# 	track_entry = Sound(original_slug = original_slug)
 
 
 
 
-	for k,v in track.items():
-		track_entry.k = v
-	track_entry.save()
-	track_entry.source = source_entry
-	track_entry.save()
-	post = Post(source = source, post_url = url, sound = track_entry)
-	post.save()
+# 	for k,v in track.items():
+# 		track_entry.k = v
+# 	track_entry.save()
+# 	track_entry.source = source_entry
+# 	track_entry.save()
+# 	post = Post(source = source, post_url = url, sound = track_entry)
+# 	post.save()
 
-def save_playlist(playlist):
-	pass
+# def save_playlist(playlist):
+# 	pass
 
 
 

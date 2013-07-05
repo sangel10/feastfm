@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>Title of the document</title>
+
+</head>
+
+<body>
+
+
+<form name="username"  action=# method="get" onsubmit="getartists()">
+Last.FM Username: <input type="text" id = "username" >
+<input type="submit" value="Submit" >
+</form>
+
+
+<div id="player">
+</div>
+
+<ul id="tracks">
+</ul>
+
+<script src="http://code.jquery.com/jquery-latest.min.js" type="text/javascript"></script>
+
+<script>
+
+var lastfm_api_key = "c43db4e93f7608bb10d96fa5f69a74a1";
+
+
+function getartists(){
+	username = document.getElementById("username").value;
+	var lastfm_url = "http://ws.audioscrobbler.com/2.0/?method=user.gettopartists&user="+username+"&api_key="+lastfm_api_key+"&format=json&limit=100"
+}
+
+
+
+
+</script>
+
+
+</body>
+
+</html>
