@@ -6,6 +6,22 @@ ROOT_PATH = os.path.abspath(os.path.curdir)
 DEBUG = True
 TEMPLATE_DEBUG = DEBUG
 
+#users
+AUTH_PROFILE_MODULE = 'scrapers.UserProfile'
+
+
+#registration settings
+
+# django-registration
+ACCOUNT_ACTIVATION_DAYS = 7
+EMAIL_USE_TLS = True
+EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST_USER = 'feastfm@gmail.com'
+EMAIL_HOST_PASSWORD = 'iloveagoodfeast'
+EMAIL_PORT = 587
+DEFAULT_FROM_EMAIL = 'DevBox <feastfm@gmail.com>'
+LOGIN_REDIRECT_URL = '/'
+
 ADMINS = (
     ('santiago', 'santiagoangel10@gmail.com'),
     # ('Your Name', 'your_email@example.com'),
@@ -94,7 +110,7 @@ STATICFILES_FINDERS = (
 #    'django.contrib.staticfiles.finders.DefaultStorageFinder',
 )
 
-# Make this unique, and don't share it with anybody.
+# Make this unique, and don't share it with anybodyself.
 SECRET_KEY = 'd7#$(r)pe#xqq@6tf8-tbvfru5!0s$oh+4#c!v&amp;l#4k6gg3irr'
 
 # List of callables that know how to import templates from various sources.
@@ -143,6 +159,7 @@ INSTALLED_APPS = (
     'celerytest',
     'south',
     'musicbrainz',
+    'registration',
 )
 
 BROKER_URL = "django://" # tell kombu to use the Django database as the message queue  

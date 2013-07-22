@@ -1,4 +1,6 @@
 from django.conf.urls import patterns, include, url
+from registration.backends.simple.views import RegistrationView
+from scrapers.views import CustomRegistrationView
 
 # Uncomment the next two lines to enable the admin:
 # from django.contrib import admin
@@ -8,6 +10,17 @@ urlpatterns = patterns('',
     # Examples:
     url(r'^$', 'scrapers.views.home'),
     url(r'^album_ajax/$', 'scrapers.views.get_album_tracks'),
+    url(r'^artist/(?P<artist_id>[^/]+)/$', 'scrapers.views.artist_browse'),
+    url(r'^label/(?P<label_id>[^/]+)/$', 'scrapers.views.label'),
+    url(r'^search/$', 'scrapers.views.search'),
+    #url(r'^login/$', 'django.contrib.auth.views.login'),
+    #url(r'^accounts/', include('registration.urls')),
+    url(r'^accounts/register/$',
+		CustomRegistrationView.as_view(),
+    	name='registration_register',
+    	),
+    url(r'^accounts/', include('registration.backends.simple.urls')),
+
     # url(r'^feast/', include('feast.foo.urls')),
 
     # Uncomment the admin/doc line below to enable admin documentation:

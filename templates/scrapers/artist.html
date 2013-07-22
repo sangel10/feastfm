@@ -1,0 +1,18 @@
+
+{% extends "home.html" %}
+
+{% block content %}
+{% if page == 'artist' %}
+{% if releases %}
+
+{% for release in releases %}
+    <ul data-rgid = "{{release.rgid}}" data-artist ="{{ release.artist }}" data-title ="{{release.title}}" data-reid = "{{release.reid}}" data-release-status = "{{ release.release_status}}"  class = "album" >{{ release.artist }} - {{release.title}} </ul>
+{% endfor %}
+
+
+{% else %}
+
+<p>No releases</p>
+{% endif %}
+{% endif %}
+{% endblock %}

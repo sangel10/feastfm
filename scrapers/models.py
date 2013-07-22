@@ -1,4 +1,6 @@
 from django.db import models
+from django.contrib.auth.models import User
+from django.db.models.signals import post_save
 
 # Create your models here.
 
@@ -117,6 +119,18 @@ class Mix_Series(models.Model):
 	mixes = models.ManyToManyField(MixesDB_mix, related_name = "mix series", blank=True, null = True)
 
 
+# class UserProfile(models.Model):
+#     # This field is required.
+#     user = models.OneToOneField(User)
+#     artists = models.ManyToManyField(Artist, related_name = "users", blank=True, null = True)
+#     labels = models.ManyToManyField(Label, related_name = "users", blank=True, null = True)
+#     sources = models.ManyToManyField(Source, related_name = "users", blank=True, null = True)
+#     mix_series = models.ManyToManyField(Mix_Series, related_name = "users", blank=True, null = True)
 
+# def create_user_profile(sender, instance, created, **kwargs):
+# 	if created:
+# 		UserProfile.objects.create(user=instance)
+
+# post_save.connect(create_user_profile, sender=User)
 
 
