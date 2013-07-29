@@ -24,9 +24,9 @@ def home(request):
 		artist_names = []
 		for artist in artists:
 			artist_names.append(artist['name'])
-		query = get_stream_query(artist_names)
+		query = get_stream_query('artist', artist_names)
 
-		releases = get_browse_releases('stream', query)
+		releases, rgids = get_browse_releases('stream', query)
 
 
 		#return HttpResponse("Username found: %s" % username )
@@ -57,7 +57,8 @@ def get_lastfm_artists(username, number):
 			artists.append({"name":artist["name"], "mbid":artist['mbid']})
 		return artists
 
-def get_stream_query(artists):
+def get_stream_query(query_type, mbids):
+	# query_type = 'artist'
 	today = datetime.date.today()
 	last_month = today - datetime.timedelta(days=60)
 	end_date = today.strftime('%Y-%m-%d')
@@ -65,11 +66,11 @@ def get_stream_query(artists):
 
 	query = 'date:['+start_date +" TO "+ end_date+']'
 	query += "AND("
-	for artist in artists:
-		if artists.index(artist) == 0:
-			query = query + 'artist: "' + artist + '"'
+	for mbid in mbids:
+		if mbids.index(mbid) == 0:
+			query = query + query_type+': "' + mbid + '" '
 		else:
-			query = query + ' OR artist:"' + artist + '"'
+			query = query + ' OR '+query_type+':"' + mbid + '" '
 
 	query += ')'
 	query = urllib.quote_plus(query.encode('utf8'))
@@ -102,7 +103,9 @@ def get_album_tracks(request):
 
 
 def artist_browse(request, artist_id):
-	releases = get_browse_releases('artist', artist_id)
+	releases,rgids = get_browse_releases('artist', artist_id)
+	print "artist releases \n \n \n "
+	print releases 
 	return render_to_response('scrapers/home.html',{'page':'artist', 'releases':releases}, context_instance=RequestContext(request))
 	#return HttpResponse("artist id: " +artist_id)
 
@@ -110,18 +113,17 @@ def artist_browse(request, artist_id):
 
 
 def label(request, label_id):
-	releases = get_browse_releases('label', label_id)
+	releases,rgids = get_browse_releases('label', label_id)
 	#return render_to_response('scrapers/home.html',{'page':'label', 'releases':releases})
 	#return HttpResponse("label id: " +label_id)
 	return render_to_response('scrapers/home.html',{'page':'label', 'releases':releases}, context_instance=RequestContext(request))
 
 
 
-def get_browse_releases(query_type, mbid, rgids = None):
+def get_browse_releases(query_type, mbid, rgids = []):
 	offset = 0
 	releases = []
-	if rgids == None:
-		rgids = []
+	#rgids = []
 	while True:
 		if query_type == 'label':
 			url = "http://www.musicbrainz.org/ws/2/release?label="+mbid+"&fmt=json&limit=100&offset="+str(offset)+"&inc=artist-credits+release-groups+labels"
@@ -138,7 +140,9 @@ def get_browse_releases(query_type, mbid, rgids = None):
 		rgids += parsed_results['rgids']
 		offset +=100
 	#return render_to_response('scrapers/home.html',{'page':query_type, 'releases':releases})
-	return releases	
+	print "get_browser_releases, releases: "
+	print releases
+	return releases, rgids
 
 
 def parse_releases(api_results, rgids):
@@ -311,34 +315,34 @@ def get_english_alias(lookup_type, mbid):
 		name = results['name']
 	return name
 
-# def stream(request):
-# 	if request.user.is_authenticated():
-# 		artist_set = request.user.get_profile().artists.all()
-# 		print artist_set
-# 		artist_ids = []
-# 		for artist in artist_set:
-# 			artist_ids.append(artist.mbid)
+def stream(request):
+	if request.user.is_authenticated():
+		artist_set = request.user.get_profile().artists.all()
+		print artist_set
+		artist_ids = []
+		for artist in artist_set:
+			artist_ids.append(artist.mbid)
 
-# 		label_set = request.user.get_profile().artists.all()
-# 		label_ids = []
-# 		for label in label_set:
-# 			label_ids.append(label.mbid)
+		label_set = request.user.get_profile().artists.all()
+		label_ids = []
+		for label in label_set:
+			label_ids.append(label.mbid)
 
-# 		rgids = []
-# 		releases = []
+		rgids = []
+		releases = []
 
-# 		query = get_stream_query('arid', artist_ids)
-# 		new_releases, new_rgids = get_browse_releases('stream', query, rgids)
-# 		releases +=new_releases
-# 		rgids+= new_rgids
+		query = get_stream_query('arid', artist_ids)
+		new_releases, new_rgids = get_browse_releases('stream', query, rgids)
+		releases +=new_releases
+		rgids+= new_rgids
 
-# 		query = get_stream_query('laid', label_ids)
-# 		new_releases, new_rgids = get_browse_releases('stream', query, rgids)
-# 		releases +=new_releases
-# 		rgids+= new_rgids
+		query = get_stream_query('laid', label_ids)
+		new_releases, new_rgids = get_browse_releases('stream', query, rgids)
+		releases +=new_releases
+		rgids+= new_rgids
 
-# 		return render_to_response('scrapers/home.html',{'page':'stream', 'releases':releases}, context_instance=RequestContext(request))
+		return render_to_response('scrapers/home.html',{'page':'stream', 'releases':releases}, context_instance=RequestContext(request))
 
-# 	else:
-# 		HttpResponse("You need to be logged in to have a stream")
+	else:
+		HttpResponse("You need to be logged in to have a stream")
 

@@ -39,6 +39,14 @@ ul, li {
 } 
 </style>
 
+
+{% if user and user.is_authenticated %}
+    <p>Welcome, {{ user.username }}. Thanks for logging in.</p>
+{% else %}
+    <p>Welcome, new user. Please log in.</p>
+{% endif %}
+
+
 <div id="player">
 </div>
 
@@ -50,49 +58,69 @@ ul, li {
 <button type="button" id="type-sort">Sort by Type of Release </button>
 
 
-
-
 {% if releases %}
 <ul> Releases:
 {% for release in releases %}
-    <ul data-reid = "{{release.reid}}" data-artist ="{{ release.artist }}" data-title ="{{release.title}}" data-date = "{{release.date}}"data-label ="{{release.label}}" data-catalog-number = "{{release.cat_num}}" class = "album stream-item" > <a href = "/artist/{{ release.artist_id|escape }}" > {{ release.artist }} </a> - {{release.title}}
+    <ul data-reid = "{{release.reid}}" data-artist ="{{ release.artist }}" data-title ="{{release.title}}" data-date = "{{release.date}}"data-label ="{{release.label}}" data-catalog-number = "{{release.cat_num}}" class = "stream-item" > <a href = "/artist/{{ release.artist_id|escape }}" > {{ release.artist }} </a> 
+        <span data-artist-id = "{{ release.artist_id }}" ><button type="button" class ="follow-artist">Follow Artist</button>
+        </span>
+
+        <div class = 'album'> {{release.title}}
         <span class = "release-type">[{{release.primary_type}}] 
             {% if release.secondary_types %} 
             [{{release.secondary_types}}]  
             {% endif %} 
         </span>
         <span class = "date">{{release.date}}</span>
-        <div class = "label"><a class = "label-link" href = "/label/{{ release.label_id|escape }}" >{{release.label}}</a></div>
+        </div>
+        <div class = "label"><a class = "label-link" href = "/label/{{ release.label_id|escape }}" >{{release.label}}</a>
+            <span>
+                <button type="button" data-label-id = "{{ release.label_id }}" class ="follow-label">Follow Label</button>
+            </span>
+        </div>
         <div class = "catalog-number">{{release.cat_num}}</div>
     </ul>
 {% endfor %}
 </ul>
-
-{% else %}
-
-<form action="" method="get">
-{% csrf_token %}
-Last.FM Username: <input type="text" id = "username" name = "username">
-<input type="submit" value="Get albums" />
-</form>
 {% endif %}
 
+<form action="/lastfm_search" method="get">
+{% csrf_token %}
+Last.FM Username: <input type="text" id = "username" name = "username">
+<input type="submit" value="search" />
+</form>
 
 
-<!-- {% if artists %}
+<form action="/search" method="get">
+{% csrf_token %}
+Search for artist: <input type="text" name = "query" id = 'query'>
+<input type="submit" value="search for artist" />
+</form>
+
+
+
+{% if artists %}
 
 <ul> Artists:
 {% for artist in artists %}
-    <li>{{ artist }}</li>
+    <li><a href = "/artist/{{artist.mbid}}">  {{ artist.name }}</a>
+    </li>
 {% endfor %}
 </ul>
 
-{% endif %} -->
+{% endif %}
 
 
 <script>
 
 $(document).ready(function() {
+
+
+
+
+
+
+
 
 // $("ul ul").click(function(this){
 // 	alert(this);
@@ -134,39 +162,161 @@ $("#catalog-sort").click(function(){
     $(".stream-item").tsort("div.catalog-number");
 });
 
+
+
+
+
+$.ajaxSetup({ 
+
+    "error":function(XMLHttpRequest,textStatus, errorThrown) {   
+      // alert(textStatus);
+      // alert(errorThrown);
+      alert(XMLHttpRequest.responseText);
+  },
+
+     beforeSend: function(xhr, settings) {
+         function getCookie(name) {
+             var cookieValue = null;
+             if (document.cookie && document.cookie != '') {
+                 var cookies = document.cookie.split(';');
+                 for (var i = 0; i < cookies.length; i++) {
+                     var cookie = jQuery.trim(cookies[i]);
+                     // Does this cookie string begin with the name we want?
+                 if (cookie.substring(0, name.length + 1) == (name + '=')) {
+                     cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+                     break;
+                 }
+             }
+         }
+         return cookieValue;
+         }
+         if (!(/^http:.*/.test(settings.url) || /^https:.*/.test(settings.url))) {
+             // Only send the token to relative URLs i.e. locally.
+             xhr.setRequestHeader("X-CSRFToken", getCookie('csrftoken'));
+         }
+     },
+
+
+});
+
+
+
+$('.follow-artist').click(function(e){
+    var button = $(e.target)
+    var $target = $(e.target).parent();
+    var $target_parent = $($target).parent();
+    console.log($target);
+    console.log($target_parent);
+    var artist_id = $($target).data('artist-id');
+    var artist_name = $($target_parent).data('artist');
+    console.log('artist id: ' +artist_id);
+    console.log('artist name: '+artist_name);
+    data = {'type':'artist', 'artist_id':artist_id, 'artist_name':artist_name};
+    $.ajax({
+        type: "POST",
+        url: "/follow_toggle/",
+        data: data ,
+        success: function(){
+            //alert("it worked");
+            console.log( button);
+            if ($(button).text() != "Following"){
+                $(button).text("Following");
+            }
+            else{
+                $(button).text("Follow");
+            }
+        },
+        })
+
+    // .then(
+    //         function(){ alert(" follow succeeded"); 
+    //             },
+    //         function(){ alert(" follow failed!"); 
+    //             }
+    //     );
+
+})
+
+
+$('.follow-label').click(function(e){
+    var button = $(e.target)
+    // var $target = $(e.target).parent();
+    // var $target_parent = $($target).parent();
+    // console.log($target);
+    // console.log($target_parent);
+    var label_id = $(button).data('label-id');
+    //var artist_name = $($target_parent).data('artist');
+    // console.log('artist id: ' +artist_id);
+    // console.log('artist name: '+artist_name);
+    data = {'type':'label', 'label_id':label_id,};
+    $.ajax({
+        type: "POST",
+        url: "/follow_toggle/",
+        data: data,
+        success: function(){
+            //alert("it worked");
+            console.log( button);
+            if ($(button).text() != "Following"){
+                $(button).text("Following");
+            }
+            else{
+                $(button).text("Follow");
+            }
+        },
+        })
+
+    // .then(
+    //         function(){ alert(" follow succeeded"); 
+    //             },
+    //         function(){ alert(" follow failed!"); 
+    //             }
+    //     );
+
+})
+
 var currentTrack;
 
-$('ul.album').click(function(e){
-	var $target = $(e.target);
-    if(!$target.is("ul")) //magic happens here!!
+$('.album').click(function(e){
+    console.log("album clicked")
+    //alert("album clicked")
+	var $target = $(e.target).parent();
+    console.log($target);
+    if(!$target.is("ul"))
+    //if(!$target.is("div")) //magic happens here!!
         {
+            console.log("target is not ul");
             return;
         }
 	if($(this).children("li").length >= 1){
 		$(this).children("li").toggle();
 	}
 	else{
-	    var reid = $(this).data('reid');
-	    ul = this;
-	    //var data = {"reid": reid};
-	    // var args = { type:"GET", url:"/album/", data:data, complete:done };
-	    // $.ajax(args);
-	    $.getJSON("/album_ajax/", {"reid": reid}, function(json){
-	    if(json['tracks']){
-	    	//alert("json?: " + json["tracks"]+" reid: "+json['reid']);
-	    	// var album = $('data-reid ='+)
-	    	for(var i=0; i<json['tracks'].length; i++){
-	    		//console.log(json['tracks'][i]['title'])
-	    		var artist = json['tracks'][i]['artist']
-	    		var title = json['tracks'][i]['title']
-	    		$(ul).append("<li class = 'album-track track' data-artist = '"+escape(artist) +"' data-title ='" + escape(title) +"'>"+artist +" - "+ title+"</li>");
-	    	}
-   		
-   		}
-		else{
-			alert('no results')
-		}
+        var reid = $($target).data('reid');
+	    //var reid = $(this).data('reid');
+        if (reid !== undefined){
+            console.log("reid: "+reid)
+    	    ul = this;
+    	    var data = {"reid": reid};
+    	    // var args = { type:"GET", url:"/album/", data:data, complete:done };
+    	    // $.ajax(args);
+    	    $.getJSON("/album_ajax/", data, function(json){
+                console.log("calling getJSON")
+        	    if(json['tracks']){
+        	    	//alert("json?: " + json["tracks"]+" reid: "+json['reid']);
+        	    	// var album = $('data-reid ='+)
+        	    	for(var i=0; i<json['tracks'].length; i++){
+        	    		//console.log(json['tracks'][i]['title'])
+        	    		var artist = json['tracks'][i]['artist']
+        	    		var title = json['tracks'][i]['title']
+        	    		$(ul).append("<li class = 'album-track track' data-artist = '"+escape(artist) +"' data-title ='" + escape(title) +"'>"+artist +" - "+ title+"</li>");
+        	    	}
+                }
+    		else{
+    			alert('no results')
+    		}
+
 		})
+    }
 	}
 });
 

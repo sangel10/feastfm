@@ -69,6 +69,7 @@ class Post(models.Model):
 class Label(models.Model):
 	name = models.CharField(max_length = 500)
 	label_duplicates = models.ManyToManyField('self', blank=True, null=True)
+	mbid = models.CharField(max_length = 500, blank=True)
 
 	sounds = models.ManyToManyField(Sound, related_name = 'labels', null=True)
 	sources = models.ManyToManyField(Source, related_name= 'labels', null=True)
@@ -80,6 +81,7 @@ class Label(models.Model):
 class Artist(models.Model):
 	name = models.CharField(max_length = 500)
 	artist_duplicates = models.ManyToManyField('self', blank=True, null=True)
+	mbid = models.CharField(max_length = 500, blank=True)
 
 	labels = models.ManyToManyField(Label, related_name = 'artists', blank=True, null=True)
 	sounds = models.ManyToManyField(Sound, related_name = 'artists', blank=True, null=True)
@@ -114,23 +116,33 @@ class MixesDB_mix(models.Model):
 	mix_duplicates = models.ManyToManyField('self', blank=True, null=True)
 	sounds = models.ManyToManyField(Sound, related_name = 'mixes', blank=True, null=True)
 
+	def __unicode__(self):
+		return self.title
+
 class Mix_Series(models.Model):
 	name = models.CharField(max_length = 500)
 	mixes = models.ManyToManyField(MixesDB_mix, related_name = "mix series", blank=True, null = True)
 
+	def __unicode__(self):
+		return self.name
 
-# class UserProfile(models.Model):
-#     # This field is required.
-#     user = models.OneToOneField(User)
-#     artists = models.ManyToManyField(Artist, related_name = "users", blank=True, null = True)
-#     labels = models.ManyToManyField(Label, related_name = "users", blank=True, null = True)
-#     sources = models.ManyToManyField(Source, related_name = "users", blank=True, null = True)
-#     mix_series = models.ManyToManyField(Mix_Series, related_name = "users", blank=True, null = True)
 
-# def create_user_profile(sender, instance, created, **kwargs):
-# 	if created:
-# 		UserProfile.objects.create(user=instance)
+class UserProfile(models.Model):
+    # This field is required.
+    user = models.OneToOneField(User)
+    artists = models.ManyToManyField(Artist, related_name = "users", blank=True, null = True)
+    labels = models.ManyToManyField(Label, related_name = "users", blank=True, null = True)
+    sources = models.ManyToManyField(Source, related_name = "users", blank=True, null = True)
+    mix_series = models.ManyToManyField(Mix_Series, related_name = "users", blank=True, null = True)
+    sounds = models.ManyToManyField(Sound, related_name = "users", blank=True, null = True)
 
-# post_save.connect(create_user_profile, sender=User)
+  #   def __unicode__(self):
+		# return self.user
+
+def create_user_profile(sender, instance, created, **kwargs):
+	if created:
+		UserProfile.objects.create(user=instance)
+
+post_save.connect(create_user_profile, sender=User)
 
 
