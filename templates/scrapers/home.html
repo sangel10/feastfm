@@ -34,18 +34,27 @@
 
 }
 
+#login{
+    float:right;
+}
+
 ul, li {
     list-style-type: none;
 } 
 </style>
 
+<a href = "/stream"> Stream</a>
 
+<div id = "login">
 {% if user and user.is_authenticated %}
-    <p>Welcome, {{ user.username }}. Thanks for logging in.</p>
+    <p>Logged in as: {{ user.username }}</p>
+    <a href='/accounts/logout'> Logout </a>
 {% else %}
-    <p>Welcome, new user. Please log in.</p>
+        <a href = '/accounts/login'> Login </a>
+        <br/>
+        <a href = '/accounts/register'> Register </a>
 {% endif %}
-
+</div>
 
 <div id="player">
 </div>
@@ -62,7 +71,8 @@ ul, li {
 <ul> Releases:
 {% for release in releases %}
     <ul data-reid = "{{release.reid}}" data-artist ="{{ release.artist }}" data-title ="{{release.title}}" data-date = "{{release.date}}"data-label ="{{release.label}}" data-catalog-number = "{{release.cat_num}}" class = "stream-item" > <a href = "/artist/{{ release.artist_id|escape }}" > {{ release.artist }} </a> 
-        <span data-artist-id = "{{ release.artist_id }}" ><button type="button" class ="follow-artist">Follow Artist</button>
+        <span >
+            <button type="button" data-artist-id = "{{ release.artist_id }}" class ="follow-artist">Follow Artist</button>
         </span>
 
         <div class = 'album'> {{release.title}}
@@ -90,11 +100,29 @@ Last.FM Username: <input type="text" id = "username" name = "username">
 <input type="submit" value="search" />
 </form>
 
+<form action="/soundcloud_search" method="get">
+{% csrf_token %}
+
+Search for: 
+<select id="query-type" name= 'query-type'>
+        <option value="artist">artist</option>
+        <option value="label">label</option>
+    </select>
+by SoundCloud Username: <input type="text" id = "username" name = "username">
+<input type="submit" value="search" />
+</form>
+
+
 
 <form action="/search" method="get">
 {% csrf_token %}
-Search for artist: <input type="text" name = "query" id = 'query'>
-<input type="submit" value="search for artist" />
+Search for: 
+    <select id="query-type" name= 'query-type'>
+        <option value="artist">artist</option>
+        <option value="label">label</option>
+    </select>
+    <input type="text" name = "query" id = 'query'>
+    <input type="submit"/>
 </form>
 
 
@@ -104,6 +132,23 @@ Search for artist: <input type="text" name = "query" id = 'query'>
 <ul> Artists:
 {% for artist in artists %}
     <li><a href = "/artist/{{artist.mbid}}">  {{ artist.name }}</a>
+        <span >
+            <button type="button" data-artist-id = "{{ artist.mbid }}" class ="follow-artist">Follow Artist</button>
+        </span>
+    </li>
+{% endfor %}
+</ul>
+
+{% endif %}
+
+{% if labels %}
+
+<ul> Labels:
+{% for label in labels %}
+    <li><a href = "/label/{{label.mbid}}">  {{ label.name }}</a>
+        <span >
+            <button type="button" data-label-id = "{{ label.mbid }}" class ="follow-label">Follow Label</button>
+        </span>
     </li>
 {% endfor %}
 </ul>
@@ -203,15 +248,16 @@ $.ajaxSetup({
 
 $('.follow-artist').click(function(e){
     var button = $(e.target)
-    var $target = $(e.target).parent();
-    var $target_parent = $($target).parent();
-    console.log($target);
-    console.log($target_parent);
-    var artist_id = $($target).data('artist-id');
-    var artist_name = $($target_parent).data('artist');
+    // var $target = $(e.target).parent();
+    // var $target_parent = $($target).parent();
+    // console.log($target);
+    // console.log($target_parent);
+    // var artist_id = $($target).data('artist-id');
+    // var artist_name = $($target_parent).data('artist');
+    var artist_id = $(button).data('artist-id');
     console.log('artist id: ' +artist_id);
-    console.log('artist name: '+artist_name);
-    data = {'type':'artist', 'artist_id':artist_id, 'artist_name':artist_name};
+    // console.log('artist name: '+artist_name);
+    data = {'type':'artist', 'artist_id':artist_id,}; //'artist_name':artist_name};
     $.ajax({
         type: "POST",
         url: "/follow_toggle/",
@@ -245,6 +291,7 @@ $('.follow-label').click(function(e){
     // console.log($target);
     // console.log($target_parent);
     var label_id = $(button).data('label-id');
+    console.log(label_id)
     //var artist_name = $($target_parent).data('artist');
     // console.log('artist id: ' +artist_id);
     // console.log('artist name: '+artist_name);
@@ -354,8 +401,8 @@ var playerEl = document.getElementById("player");
 renderTrack = function(artist, title){
     var title = title;
     var artist = artist;
-    var width = 200;
-    var height = 200;
+    var width = 250;
+    var height = 250;
 
     var disabled0 = undefined;
     var disabled1 = undefined;
