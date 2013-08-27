@@ -1,0 +1,230 @@
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="">
+    <meta name="author" content="">
+    <link rel="shortcut icon" href="../../assets/ico/favicon.png">
+
+    <title>Static Top Navbar Example for Bootstrap</title>
+
+    <!-- Bootstrap core CSS -->
+    <link href="css/bootstrap.css" rel="stylesheet">
+
+    <!-- Custom styles for this template -->
+    <link href="css/navbar-static-top.css" rel="stylesheet">
+
+    <!-- HTML5 shim and Respond.js IE8 support of HTML5 elements and media queries -->
+    <!--[if lt IE 9]>
+      <script src="../../assets/js/html5shiv.js"></script>
+      <script src="../../assets/js/respond.min.js"></script>
+    <![endif]-->
+  </head>
+
+  <body>
+
+    <!-- Static navbar -->
+    <div class="navbar navbar-default navbar-fixed-top">
+      <div class="container">
+        <div class="navbar-header">
+          <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+            <span class="icon-bar"></span>
+          </button>
+          <a class="navbar-brand" href="#">Feast.fm</a>
+        </div>
+        <div class="navbar-collapse collapse">
+          <ul class="nav navbar-nav">
+            <li class="active"><a href="#">Stream</a></li>
+            <li> <a href="">Search</a><li>
+          </ul>
+
+           <!-- <form class="navbar-form navbar-left" role="search">
+            <div class="form-group">
+              <input type="text" class="form-control" placeholder="Search">
+            </div>
+            <button type="submit" class="btn btn-default">Submit</button>
+          </form> -->
+
+          <ul class="nav navbar-nav navbar-right">
+            <li><a href = "">Artist-Title</a></li>
+            <li><button type="button" class="btn btn-default navbar-btn"><span class="glyphicon glyphicon-backward"></button></li>
+            <li><button type="button" class="btn btn-default navbar-btn"><span class="glyphicon glyphicon-play"></span>/<span class="glyphicon glyphicon-pause"></span></button></li>
+            <li><button type="button" class="btn btn-default navbar-btn"><span class="glyphicon glyphicon-forward"></button></li>
+            
+
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown">My Music <b class="caret"></b></a>
+              <ul class="dropdown-menu">
+                <li><a href="#">Artists/Labels/Sites</a></li>
+                <li><a href="#">Loved Songs</a></li>
+                <li><a href="#">Playlists</a></li>
+              </ul>
+            </li>
+
+
+            <li class="dropdown">
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown">Profile <b class="caret"></b></a>
+              <ul class="dropdown-menu">
+                <li><a href="#">Account Settings</a></li>
+                <li><a href="#">Logout</a></li>
+
+              </ul>
+            </li>
+          </ul>
+
+        </div><!--/.nav-collapse -->
+      </div>
+    </div>
+
+
+    <div class="container col-md-8 col-md-offset-2  ">
+
+      Two Divs
+      <div class="media">
+        <a class="pull-left" href="#">
+          <img class="media-object" src="antlers.png" alt="...">
+        </a>
+        
+        <div class="media-body">
+          <h3 class="media-heading"><a href = "#"><strong>The Antlers</strong>  </a> <button type = "button" class = "btn btn-default">Follow</button>
+            
+            <div class = "pull-right" >
+              <a title = "Expand album" class = "btn btn-default"><span class="glyphicon glyphicon-chevron-down"></span></a>
+              
+              <a title = "Play album" class = "btn btn-default"><span class="glyphicon glyphicon-play  "></span></a>
+            </div>
+            <br>
+            <em>Hospice</em>
+            <a ><span class="glyphicon glyphicon-heart"></span></a>
+            <a ><span title = "add to playlist" class="glyphicon glyphicon-plus"></span></a> 
+          </h3>
+          <h4><a href = "">Record Label/Source(for mixes)</a><button type = "button" class = "btn btn-default">Follow</button></h4>
+          <h5>Date Released</h5>
+          <h5>Catalog ID</h5>
+          <h4>
+          <ul type ="none">
+            <li><a href = "3"><span class="glyphicon glyphicon-play"></span></a> <a href = "">Artist</a> - track 1 
+              <a title = "Love track" href = "#"><span class="glyphicon glyphicon-heart"></span></a>
+              <a title ="Add to playlist"><span class="glyphicon glyphicon-plus"></span></a>
+            </li>
+            <li><a href = "3"><span class="glyphicon glyphicon-play"></span></a> <a href = "">Artist</a> - track 1 
+              <a href = "#"><span class="glyphicon glyphicon-heart"></span></a>
+              <a ><span class="glyphicon glyphicon-plus"></span></a>
+            </li><li><a href = "3"><span class="glyphicon glyphicon-play"></span></a> <a href = "">Artist</a> - track 1 
+              <a href = "#"><span class="glyphicon glyphicon-heart"></span></a>
+              <a ><span class="glyphicon glyphicon-plus"></span></a>
+            </li><li><a href = "3"><span class="glyphicon glyphicon-play"></span></a> <a href = "">Artist</a> - track 1 
+              <a href = "#"><span class="glyphicon glyphicon-heart"></span></a>
+              <a ><span class="glyphicon glyphicon-plus"></span></a>
+            </li>
+          </h4>
+          </ul>
+        </div>
+      </div>
+
+      <div class="media">
+        <a class="pull-left" href="#">
+          <img class="media-object" src="antlers.png" alt="...">
+        </a>
+        <div class="media-body">
+          <h4 class="media-heading">The Antlers - Hospice</h4>
+          ...
+        </div>
+      </div>
+
+<!--       <form class="form-inline" role="form">
+      
+        <div class="form-group">
+
+          <label  for="exampleInputPassword2" class="col-lg-2 control-label">Password</label>
+          <input type="text" class="form-control" id="exampleInputPassword2" placeholder="Password">
+        </div>
+
+        <button type="submit" class="btn btn-default">Search</button>
+      </form>
+
+      <form action="/soundcloud_search" method="get">
+      {% csrf_token %}
+
+      Search for: 
+      <div class="col-lg-2">
+        <select id="query-type" class = "form-control" name= 'query-type'>
+            <option value="artist">artist</option>
+            <option value="label">label</option>
+        </select>
+      </div>
+      by SoundCloud Username: <input type="text" id = "username" name = "username">
+      <input type="submit" value="search" />
+      </form> -->
+
+<br>
+
+<h4> Import artists from Soundcloud </h4> 
+<form class="form-inline " role="form">
+  <div class="form-group">
+    <div class = "input-group">
+<!--       <div class="input-group-btn">
+        <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">Action <span class="caret"></span></button>
+        <ul class="dropdown-menu">
+          <li><a href="#">Artist</a></li>
+          <li><a href="#">Label</a></li>
+        </ul>
+      </div><! /btn-group -->
+    <label class="sr-only" for="inputSCusername">Email address</label>
+    <input type="text" class="form-control" id="inputSCusername" placeholder="Username">
+    </div>
+  </div>
+
+  <button type="submit" class="btn btn-default">Search</button>
+</form>
+
+
+
+
+      Media item list
+      <ul class="media-list">
+        <li class="media">
+          <a class="pull-left" href="#">
+            <img class="media-object" src="antlers.png" alt="...">
+          </a>
+          <div class="media-body">
+            <h3 class="media-heading">The Antlers Hospice</h4>
+            ...
+          </div>
+        </li>
+        <li class="media">
+          <a class="pull-left" href="#">
+            <img class="media-object" src="antlers.png" alt="...">
+          </a>
+          <div class="media-body">
+            <h4 class="media-heading">The Antlers - Hospice</h4>
+            ...
+          </div>
+        </li>
+      </ul>
+      <!-- Main component for a primary marketing message or call to action -->
+      
+
+      <div class="jumbotron">
+        <h1>Navbar example</h1>
+        <p>This example is a quick exercise to illustrate how the default, static and fixed to top navbar work. It includes the responsive CSS and HTML, so it also adapts to your viewport and device.</p>
+        <p>To see the difference between static and fixed top navbars, just scroll.</p>
+        <p>
+          <a class="btn btn-lg btn-primary" href="../../components/#navbar">View navbar docs &raquo;</a>
+        </p>
+      </div>
+
+    </div> <!-- /container -->
+
+
+    <!-- Bootstrap core JavaScript
+    ================================================== -->
+    <!-- Placed at the end of the document so the pages load faster -->
+    <script src="http://code.jquery.com/jquery-1.10.2.min.js"></script>
+    <script src="js/bootstrap.min.js"></script>
+  </body>
+</html>

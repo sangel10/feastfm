@@ -13,7 +13,7 @@ class Sound(models.Model):
 	yt_track_id = models.CharField(max_length = 500, blank=True)
 	sc_track_id = models.CharField(max_length = 500, blank=True)
 	vimeo_track_id = models.CharField(max_length = 500, blank=True)
-	mbz_id = models.CharField(max_length = 500, blank=True)
+	mbid = models.CharField(max_length = 500, blank=True)
 	scraped = models.BooleanField(default = False)
 
 	sc_username = models.CharField(max_length = 500, blank=True)
@@ -24,7 +24,12 @@ class Sound(models.Model):
 	sound_duplicates = models.ManyToManyField('self', blank=True, null=True)
 
 	def __unicode__(self):
-		return self.original_slug
+		if self.original_slug:
+			return self.original_slug
+		# elif self.artists:
+		# 	return self.artists
+		else:
+			return self.title
 	# def __repr__(self):
 	# 	return self.original_slug
 
