@@ -185,6 +185,39 @@ $('.follow-label').click(function(e){
 
 })
 
+
+$('.love-album').click(function(e){
+    var button = $(e.target)
+    // var $target = $(e.target).parent();
+    // var $target_parent = $($target).parent();
+    // console.log($target);
+    // console.log($target_parent);
+    var reid = $(button).data('reid');
+    console.log(reid)
+    //var artist_name = $($target_parent).data('artist');
+    // console.log('artist id: ' +artist_id);
+    // console.log('artist name: '+artist_name);
+    data = {'type':'release', 'reid':reid};
+    $.ajax({
+        type: "POST",
+        url: "/follow_toggle/",
+        data: data,
+        success: function(){
+            //alert("it worked");
+            console.log( button);
+            if ($(button).hasClass("red")){
+                $(button).removeClass("red");
+            }
+            else{
+                $(button).addClass("red");
+            }
+        },
+        })
+
+})
+
+
+
 // $(document).on('click', ".like-track", function(e) {
 // // $('.like-track').click(function(e){
 //     var button = $(e.target)
@@ -220,12 +253,13 @@ $('.follow-label').click(function(e){
 $(document).on('click', ".love-track", function(e) {
 // $('.like-track').click(function(e){
     var button = $(e.target)
+    $track = $(button).closest("[data-track-id]")
     console.log("love track button clicked");
     // var $target = $(e.target).parent();
     // var $target_parent = $($target).parent();
     // console.log($target);
     // console.log($target_parent);
-    var track_id = $(button).data('track-id');
+    var track_id = $($track).data('track-id');
     // console.log(label_id)
     //var artist_name = $($target_parent).data('artist');
     // console.log('artist id: ' +artist_id);
@@ -238,11 +272,11 @@ $(document).on('click', ".love-track", function(e) {
         success: function(){
             //alert("it worked");
             console.log( button);
-            if ($(button).text() != "Like"){
-                $(button).text("Like");
+            if ($(button).hasClass("red")){
+                $(button).removeClass("red");
             }
             else{
-                $(button).text("You Like This");
+                $(button).addClass("red");
             }
         },
         })
@@ -252,15 +286,35 @@ $(document).on('click', ".love-track", function(e) {
 
 var currentTrack;
 
+
+
+
+$('.play-entire-album').click(function(e){
+    expand_album(e, true) 
+})
+
+
+
 //expand album
 $('.expand-album').click(function(e){
+    expand_album(e, false)
+});
+
+function expand_album(e, play_on_expand){
     console.log("album expanded")
     //alert("album clicked")
     var $target = $(e.target);
     console.log($target);
     var album = $($target).closest(".release")
+    console.log(album)
     var tracklist = $(album).find(".album-tracks")
-    if($(tracklist).children("li").length >= 1){
+
+    if($(tracklist).children("li").length >= 1 && play_on_expand){
+        $(tracklist).children("li").show()
+        play_album(album)
+    }
+
+    else if($(tracklist).children("li").length >= 1){
         $(tracklist).children("li").toggle();
     }
     else{
@@ -308,7 +362,7 @@ $('.expand-album').click(function(e){
                         var $artist_a = $("<a>", {href:"/artist/"+artist_id})
                         $artist_a.text(artist)
                         $($li).append($artist_a)
-                        console.log($artist_a)
+                        // console.log($artist_a)
 
                         var $title_span = $("<span>", {text:" - "+title})
                         $($li).append($title_span);
@@ -316,8 +370,8 @@ $('.expand-album').click(function(e){
 
                         var $love_a = $("<a>", {class:"pull-right", title:"Love Track"})
                         var $love_span = $("<span>", {class:"glyphicon glyphicon-heart love-track"})
-                        if (following == "You Like This"){
-                            $(love_span).addClass("red")
+                        if (following == true){
+                            $($love_span).addClass("red")
                         }
                         $($love_a).append($love_span);
                         $($li).append($love_a);
@@ -329,47 +383,41 @@ $('.expand-album').click(function(e){
 
                         $(ul).append($li)
 
-
-                    // <li>
-                    //     <a href = "#"><span class="glyphicon glyphicon-play"></span></a> 
-                    //     <a href = "">Artist</a> - track 1 
-                    //   <a title = "Love track" href = "#"><span class="glyphicon glyphicon-heart"></span></a>
-                    //   <a title ="Add to playlist"><span class="glyphicon glyphicon-plus"></span></a>
-                    // </li>
-
-
-
-
-                        // tr=document.createElement('li');
-                        // $(d).addClass("album-track track")
-                        //     .html(text)
-                        //     .appendTo($("#myDiv")) //main div
-                        //     .click(function(){
-                        //         $(this).remove();
-                        //     })
-                        //     .hide()
-                        //     .slideToggle(300)
-                        //     .delay(2500)
-                        //     .slideToggle(300)
-                        //     .queue(function() {
-                        //         $(this).remove();
-                        //     });
-
-
                     }
                 }
-            else{
-                alert('no results')
-            }
+                else{
+                    alert('no results')
+                }
 
-        })
+                if (play_on_expand){
+                    // $album = $(e.target).parents(".album")
+                    play_album(album)
+
+                }
+            })
+        }
     }
-    }
-});
+}
+
+function play_album($album){
+    // console.log($album)
+    $tracks = ($album).find(".album-tracks")
+    $li = ($tracks).find("li")
+    console.log($li)
+    play($li[0])
+}
 
 
 
+// function FollowButtons(){
+//     var f_artists = $("[data-following-artist = Following]")
+//     for (var i; i<f_artists.length; i+=1){
+//         $(f_artists[i]).removeClass("btn-default")
+//         $(f_artists[i]).addClass("btn-primary")
+//     }
+// }
 
+// FollowButtons();
 
 // $('.album').click(function(e){
 //     console.log("album clicked")
@@ -437,6 +485,7 @@ $('.expand-album').click(function(e){
 // });
 
 
+
 $(document).on('click', ".play-track", function(e) {
     // var artist = $(this).data('artist');
     // var title = $(this).data('title');
@@ -452,7 +501,29 @@ $(document).on('click', ".play-track", function(e) {
 });
 
 
+// $(document).on('click', ".track", function(e) {
+//     // var artist = $(this).data('artist');
+//     // var title = $(this).data('title');
+//  //    artist = unescape(artist);
+//  //    title = unescape(title);
+//     // alert(artist + " - "+title);
+//     // renderTrack(artist, title);
+//     console.log("track clicked")
+//     var track = $(e.target)
+//     console.log(track)
+//     play(track);
+//     // alert("you clicked a track");
+// });
 
+function htmlEncode(value){
+  //create a in-memory div, set it's inner text(which jQuery automatically encodes)
+  //then grab the encoded contents back out.  The div never exists on the page.
+  return $('<div/>').text(value).html();
+}
+
+function htmlDecode(value){
+  return $('<div/>').html(value).text();
+}
 
 var lastfm_api_key = "c43db4e93f7608bb10d96fa5f69a74a1"
 
@@ -561,56 +632,91 @@ function playPrevious(currElement, className){
 
 function play(element){
 
-    
 
-    if (playerTimeout){
-        clearTimeout(playerTimeout);
+        if (playerTimeout){
+            clearTimeout(playerTimeout);
 
-    }
+        }
 
-    // ct = $("#current-track")
-    
-    // $(currentTrack).removeAttr("style")
-    // $("#current-track span.play-track").removeAttr("style")
-    // console.log("style removed")
-    
-    // $(currentTrack).find(".play-track").attr("class","glyphicon glyphicon-play play-track")
-    $(currentTrack).find(".play-track").removeClass("red")
-    $(currentTrack).removeAttr("id")
-    // $("#current-track span.play-track").attr("class","glyphicon glyphicon-play play-track")
-    console.log("current track class reset")
-
-
-
-	currentTrack = element;
-    $(element).attr("id", "current-track")
-    // $("#current-track span.play-track").attr("style","color:red")
-    // $("#current-track span.play-track").attr("class","glyphicon glyphicon-play play-track red")
-    $("#current-track span.play-track").addClass("red")
-
-
-	var artist = $(element).data('artist');
-    var title = $(element).data('title');
+        console.log("play called")
+        // ct = $("#current-track")
+        
+        // $(currentTrack).removeAttr("style")
+        // $("#current-track span.play-track").removeAttr("style")
+        // console.log("style removed")
+        
+        // $(currentTrack).find(".play-track").attr("class","glyphicon glyphicon-play play-track")
+        $(currentTrack).find(".play-track").removeClass("red")
+        $(currentTrack).removeAttr("id")
+        // $("#current-track span.play-track").attr("class","glyphicon glyphicon-play play-track")
+        console.log("current track class reset")
 
 
 
-    if (title === null || artist === null){
+    	currentTrack = element;
+        $(element).attr("id", "current-track")
+        // $("#current-track span.play-track").attr("style","color:red")
+        // $("#current-track span.play-track").attr("class","glyphicon glyphicon-play play-track red")
+        $("#current-track span.play-track").addClass("red")
 
-    }
-    else{
 
-        $("#now-playing").text(artist +" - "+title);
 
-        artist = unescape(artist);
-        artist = removeDiacritics(artist);
-        title = unescape(title);
-        title = removeDiacritics(title);
-        renderTrack(artist, title);  
-    }
-    
-	// alert("play function rendered ");
+
+        if (title === null || artist === null){
+
+        }
+        else{
+            var artist = $(element).data('artist');
+            var title = $(element).data('title');
+
+            $("#now-playing").text(artist +" - "+title);
+
+
+            var type = $(element).data('type');
+            console.log(type)
+
+            if(type !== "text"){
+                play_embed(element);
+                }
+
+            if (type === undefined || type ==="textStatus"){
+
+                console.log("track is not type text")
+                artist = unescape(artist);
+                artist = removeDiacritics(artist);
+                title = unescape(title);
+                title = removeDiacritics(title);
+
+                renderTrack(artist, title);  
+                console.log("track rendered")
+                }
+    	   }
 }
 
+
+function play_embed(element){
+
+    // playerEl.innerHTML = "";
+    $("#player").empty()
+
+    var type = $(element).data('type');
+    var id = $(element).data('id');
+    if (type === "yt"){
+        var embed = '<iframe width="560" height="315" src="//www.youtube.com/embed/'+id+'?autoplay=1?rel=0" frameborder="0" allowfullscreen></iframe>'
+    }
+    if (type === "sc"){
+        var embed = '<iframe width="100%" height="166" scrolling="no" frameborder="no" src="https://w.soundcloud.com/player/?url=http%3A%2F%2Fapi.soundcloud.com%2Ftracks%2F'+id+'&amp;auto_play=true"></iframe>'
+    }
+    if (type === "vimeo"){
+        var embed = '<iframe src="//player.vimeo.com/video/'+id +'"width="500" height="281" frameborder="0" webkitallowfullscreen mozallowfullscreen allowfullscreen></iframe>'
+    }
+
+    $("#player").append(embed)
+    // playerEl.appendChild(embed);
+
+
+
+}
 
 
 $('#play-pause').click(function(){

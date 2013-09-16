@@ -72,12 +72,12 @@
             <li> <a href="/search">Search</a><li>
           </ul>
 
-           <!-- <form class="navbar-form navbar-left" role="search">
-            <div class="form-group">
-              <input type="text" class="form-control" placeholder="Search">
-            </div>
-            <button type="submit" class="btn btn-default">Submit</button>
-          </form> -->
+    <!--            <form class="navbar-form navbar-left" role="search">
+                <div class="form-group">
+                  <input type="text" class="form-control" placeholder="Search">
+                </div>
+                <button type="submit" class="btn btn-default">Search</button>
+              </form> -->
 
           <ul class="nav navbar-nav navbar-right">
             <li><a href = "#current-track" id = "now-playing">Artist-Title</a></li>
@@ -90,7 +90,7 @@
               <a href="#" class="dropdown-toggle" data-toggle="dropdown">My Music <b class="caret"></b></a>
               <ul class="dropdown-menu">
                 <li><a href="/my_follows">Artists/Labels/Sites</a></li>
-                <li><a href="#">Loved Songs</a></li>
+                <li><a href="/my_sounds/">Loved Songs</a></li>
                 <li><a href="#">Playlists</a></li>
               </ul>
             </li>
@@ -113,7 +113,7 @@
     </div>
 
 
-    <div class="container col-md-8 col-md-offset-2  ">
+    <div class="container col-md-8  "> <!-- col-md-offset-0 -->
 
 
 
@@ -160,21 +160,33 @@
         {% if releases %}
 <!--         <ul> Releases: -->
         {% for release in releases %}
-            <div class="media album stream-item release" >
+            <div class="media album stream-item release" 
+            data-artist = "{{release.artist}}"
+            data-artist-id = "{{release.artist_id}}"
+            data-album-title = "{{release.title}}"
+            data-catalog-num = "{{release.cat_num}}"
+            data-label = "{{release.label}}"
+            data-label-id = "{{ release.label_id }}"
+            data-date = "{{release.date}}"
+            data-reid = "{{release.reid}}" 
+            data-primary-type = "{{release.primary_type}}"
+
+            >
                 <a class="pull-left" href="#">
                   <img width = "100" height = "100" class="media-object" src="http://ws.audioscrobbler.com/2.0/?method=album.imageredirect&amp;artist={{release.artist|escape}}&amp;album={{release.title|escape}}&amp;autocorrect=1&amp;size=largesquare&amp;api_key=c43db4e93f7608bb10d96fa5f69a74a1" alt="...">
                 </a>
                 
                 <div class="media-body">
-                  <h3 class="media-heading"><a href = "/artist/{{ release.artist_id|escape }}"><strong>{{release.artist}}</strong>  </a> <button type = "button" class = "btn btn-default follow-artist" data-artist-id = "{{ release.artist_id }}">{{release.following_artist}}</button>
+                  <h3 class="media-heading"><a href = "/artist/{{ release.artist_id|escape }}"><strong>{{release.artist}}</strong>  </a> <button type = "button" class = "btn btn-default follow-artist" data-artist-id = "{{ release.artist_id }}" data-following-artist = "{{release.following_artist}}">{{release.following_artist}}</button>
                     
                     <div class = "pull-right" >
                     <span class = "expand-album" >  
                         <a title = "Expand album" ><span data-reid = "{{release.reid}}" class="glyphicon glyphicon-chevron-down"></span></a>
                     </span>
-                    <a ><span class="glyphicon glyphicon-heart"></span></a>
+
+                    <a ><span data-reid = "{{release.reid}}"  class="glyphicon glyphicon-heart love-album"></span></a>
                     <a ><span title = "add to playlist" class="glyphicon glyphicon-plus"></span></a>    
-                      <a title = "Play album" class = "btn btn-default"><span class="glyphicon glyphicon-play  "></span></a>
+                      <a title = "Play album" class = "btn btn-default"><span data-reid = "{{release.reid}}" class="glyphicon glyphicon-play play-entire-album"></span></a>
                     </div>
                     <br>
                     <em>{{release.title}}</em>
@@ -252,6 +264,29 @@
         {% endfor %}
         <!-- </ul> -->
         {% endif %}
+
+
+
+        {% if title %}
+        <h2>{{title}}</h2>
+        {% endif %}
+        {% if sounds %}
+        <h2 > Loved Songs </h2>
+
+        <ul type=none>
+        {% for sound in sounds%}
+            <!-- <h5> -->
+            <li class = " album-track track" data-artist = "{{sound.artist}}" data-title = "{{sound.title}}"
+            data-type = "{{sound.type}}" data-id = "{{sound.id}}"> 
+                <a><span class="glyphicon glyphicon-play play-track"></span></a>
+                <a href = "/artist_name/{{ sound.artist|urlencode }}">{{sound.artist}} </a> - {{sound.title}} 
+                <a class="pull-right" title="Love Track"><span class="glyphicon glyphicon-heart love-track"></span></a>
+                <a class="pull-right" title="Add to Playlist"><span class="glyphicon glyphicon-plus playlist-add"></span></a>
+            <!-- </h5> -->
+            </li>
+        {% endfor %}
+        </ul>
+        {%endif %}
 
         <form action="/lastfm_search" method="get">
         {% csrf_token %}

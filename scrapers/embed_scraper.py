@@ -5,6 +5,9 @@ import json
 from pprint import pprint
 import feedparser
 import inspect
+import datetime
+from time import mktime
+from scrapers.models import *
 
 url = 'http://www.factmag.com/2013/04/05/download-major-lazers-fourth-lazer-strikes-back-ep/'
 client_id = "a0b4638bae6d50a9296f7fc3f35442eb"
@@ -16,6 +19,7 @@ last_fm_api_key = "c43db4e93f7608bb10d96fa5f69a74a1"
 echo_nest_API_key = "FBHCMLQRHBCWD8GVA"
 
 def make_soup(url):
+	#prints function name
 	print inspect.stack()[0][3]
 	data = urllib2.urlopen(url)
 	soup = BeautifulSoup(data)
@@ -187,12 +191,15 @@ def get_SC_user(user_id):
 def get_YT_track(track_id):
 	print inspect.stack()[0][3]
 	url = "https://gdata.youtube.com/feeds/api/videos/"+track_id+"?v=2&alt=json"
-	track_data = urllib2.urlopen(url)
-	track_data = json.load(track_data)
-	entry = track_data["entry"]
-	track_dict = process_YT_track(entry)
 	tracks = []
-	tracks.append(track_dict)
+	try:
+		track_data = urllib2.urlopen(url)
+		track_data = json.load(track_data)
+		entry = track_data["entry"]
+		track_dict = process_YT_track(entry)
+		tracks.append(track_dict)
+	except:
+		pass
 	return {"tracks":tracks, "playlists":[]}
 
 #separated retrieving data from the API and processing the data in order to 
@@ -247,32 +254,48 @@ def scrape(url):
 	playlists = []
 	for track in vimeo:
 		if track["type"] == "track":
-			data = get_vimeo_track(track["link"])
-			#results = update_results(results, data)
-			playlists = playlists +data["playlists"]
-			tracks = tracks + data["tracks"]
+			try:
+				data = get_vimeo_track(track["link"])
+				#results = update_results(results, data)
+				playlists = playlists +data["playlists"]
+				tracks = tracks + data["tracks"]
+			except:
+				pass
 	for track in SC:
 		if track["type"] == "playlist":
-			data = get_SC_playlist(track["link"])
-			#results = update_results(results, data)
-			playlists = playlists +data["playlists"]
-			tracks = tracks + data["tracks"]
+			try:
+				data = get_SC_playlist(track["link"])
+				#results = update_results(results, data)
+				playlists = playlists +data["playlists"]
+				tracks = tracks + data["tracks"]
+			except:
+				pass
+
 		if track["type"] == "track":
-			data = get_SC_track(track["link"])
-			#results = update_results(results, data)
-			playlists = playlists +data["playlists"]
-			tracks = tracks + data["tracks"]
+			try:
+				data = get_SC_track(track["link"])
+				#results = update_results(results, data)
+				playlists = playlists +data["playlists"]
+				tracks = tracks + data["tracks"]
+			except:
+				pass
 	for track in YT:
 		if track["type"] == "playlist":
-			data = get_YT_playlist(track["link"])
-			#results = update_results(results, data)
-			playlists = playlists +data["playlists"]
-			tracks = tracks + data["tracks"]
+			try:
+				data = get_YT_playlist(track["link"])
+				#results = update_results(results, data)
+				playlists = playlists +data["playlists"]
+				tracks = tracks + data["tracks"]
+			except:
+				pass
 		if track["type"] == "track":
-			data = get_YT_track(track["link"])
-			#results = update_results(results, data)
-			playlists = playlists +data["playlists"]
-			tracks = tracks + data["tracks"]
+			try:
+				data = get_YT_track(track["link"])
+				#results = update_results(results, data)
+				playlists = playlists +data["playlists"]
+				tracks = tracks + data["tracks"]
+			except:
+				pass
 	return {"tracks":tracks, "playlists":playlists}
 	#return results
 
@@ -379,7 +402,7 @@ def save_track(track):
 	original_slug = track["title"]
 	length = track["length"]
 	date = track["published"]
-	date = datetime.fromtimestamp(mktime(date))
+	date = datetime.datetime.fromtimestamp(mktime(date))
 	if Source.objects.filter(url=source_url):
 		source = Source.objects.filter(url=source_url)[0]
 	else:
@@ -417,9 +440,25 @@ def save_track(track):
 	sound.posts.add(post)
 	sound.source.add(source)
 	sound.save()
+	save_track_artist(sound)
 	source.posts.add(post)
 	source.save()
 	return source,post,sound
+
+
+def save_track_artist(track):
+	sound = track
+	if " - " in sound.original_slug:
+		a = sound.original_slug.split(" - ")[0]
+		artist = Artist.objects.get_or_create(name = a)
+		sound.artists.add(artist[0])
+		sound.title = sound.original_slug.split(" - ")[1]
+		sound.save()
+	else:
+		pass
+
+
+
 
 # def save_track(track):
 # 	source_name = track.pop("source")

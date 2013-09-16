@@ -16,7 +16,7 @@ from scrapers.models import *
 
 
 sc_client_id = 'a0b4638bae6d50a9296f7fc3f35442eb'
-
+lastfm_api_key = "c43db4e93f7608bb10d96fa5f69a74a1"
 
 
 #@login_required(login_url='/accounts/login/')
@@ -50,7 +50,7 @@ def home(request):
 
 
 def get_lastfm_artists(username, number):
-		lastfm_api_key = "c43db4e93f7608bb10d96fa5f69a74a1"
+		
 		limit = number
 		url = "http://ws.audioscrobbler.com/2.0/?method=user.gettopartists&user="+username+"&api_key="+lastfm_api_key+"&format=json&limit="+str(limit)
 		print url
@@ -64,7 +64,7 @@ def get_lastfm_artists(username, number):
 def get_stream_query(query_type, mbids):
 	# query_type = 'artist'
 	today = datetime.date.today()
-	last_month = today - datetime.timedelta(days=90)
+	last_month = today - datetime.timedelta(days=30)
 	end_date = today.strftime('%Y-%m-%d')
 	start_date = last_month.strftime('%Y-%m-%d')
 
@@ -438,9 +438,61 @@ def follow_toggle(request):
 				user_profile.save()
 				print "followed sound"
 
-		# except Exception as e:
-		# 	print e
+		#release
+		if post['type'] == 'release':
+			print "type: release "
+			reid = post['reid']
+			print reid
+			release, release_created = Release.objects.get_or_create(release_id = reid)
+			print release 
+			if release_created:
+				url = "http://www.musicbrainz.org/ws/2/release/"+reid+"?fmt=json&inc=labels+release-groups+recordings+artist-credits"
+				print "This is the release url " + url
+				data = urllib2.urlopen(url)
+				api_results = json.load(data)
+				release.title = api_results['title']
+				release.save()
+				print "added release"
 
+				release.date_released_string = api_results['date']
+				release.primary_type = api_results['release-group']['primary_type']
+				release.secondary_types = "".join(api_results['release-group']['secondary_types'])
+
+				for label in api_results['label-info']:
+					try:
+						label_id = label['id']
+						label_name = label['name']
+						label, label_created = Label.objects.get_or_create(mbid = label_id)
+						label.save()
+						if label_created:
+							label.name = label_name
+							label.save()
+						release.labels.add(label)
+						release.save()
+					except:
+						print "no label info"
+					try:
+						release.catalog_number = label["catalog-number"]
+						release.save()
+					except:
+						print "no catalog number"
+
+
+				for artist in api_results['artist-credit']:
+					artist_id = artist['artist']['id']
+					artist = get_artist_by_mbid(artist_id)
+					release.artists.add(artist)
+					release.save()
+
+			if user_profile.releases.filter(release_id = reid).exists():
+				user_profile.releases.remove(releases)
+				user_profile.save()
+				print "unfollowed release"
+
+			else:
+				user_profile.releases.add(release)
+				user_profile.save()
+				print "followed release"
 
 
 		return HttpResponse("you're logged in!! " + request.user.username)
@@ -513,8 +565,10 @@ def check_if_follows(request, model_type, list_of_entities):
 		 	for item in list_of_entities:
 		 		if item['artist_id'] in mbids:
 		 			item['following_artist'] = 'Following'
+		 			# item['following_artist'] = True
 		 		else:
 		 			item['following_artist'] = 'Follow'
+		 			# item['following_artist'] = False
 	 	if model_type == 'labels':
 	 		model_entries = request.user.get_profile().labels.all()
 		 	mbids = []
@@ -523,8 +577,10 @@ def check_if_follows(request, model_type, list_of_entities):
 	 		for item in list_of_entities:
 		 		if item['label_id'] in mbids:
 		 			item['following_label'] = 'Following'
+		 			# item['following_label'] = True
 		 		else:
 		 			item['following_label'] = 'Follow'
+		 			# item['following_label'] = False
 		if model_type =='sounds':
 			model_entries = request.user.get_profile().sounds.all()
 		 	mbids = []
@@ -532,16 +588,20 @@ def check_if_follows(request, model_type, list_of_entities):
 		 		mbids.append(entry.mbid)
 		 	for item in list_of_entities:
 		 		if item['track_id'] in mbids:
-		 			item['following_sound'] = "You Like This"
+		 			# item['following_sound'] = "You Like This"
+		 			item['following_sound'] = True
 		 		else:
-		 			item['following_sound'] = 'Like'
+		 			# item['following_sound'] = 'Like'
+		 			item['following_sound'] = False
 
 		return list_of_entities
 	else:
 	 	for item in list_of_entities:
 	 		item['following_artist'] = 'Follow'
 	 		item['following_label'] = 'Follow'
-	 		item['following_sound'] = 'Like'
+	 		# item['following_sound'] = 'Like'
+	 		item['following_sound'] = False
+
  		return list_of_entities
 
 
@@ -565,24 +625,106 @@ def my_follows(request):
 		return HttpResponse("You need to be logged in to see followed artists and labels")
 
 def my_sounds(request):
-	pass
+	if request.user.is_authenticated():
+		sound_set = request.user.get_profile().sounds.all()
+		sounds = []
+		for sound in sound_set:
+			sounds.append({'artist':sound.artists.all()[0], 'title':sound.title, 'mbid':sound.mbid})
+		# artists = check_if_follows(request, 'artists', artists)
+
+		# label_set = request.user.get_profile().labels.all()
+		# labels = []
+		# for label in label_set:
+		# 	labels.append({'name':label.name, 'label_id':label.mbid})
+		# labels = check_if_follows(request, 'labels', labels)
+
+		return render_to_response('scrapers/home.html',{'page':'my_sounds', 'sounds':sounds}, context_instance=RequestContext(request))
+
+	else:
+		return HttpResponse("You need to be logged in to see followed artists and labels")
+
+def artist_by_name(request, artist):
+	artist = urllib.quote(artist)
+	url = "http://ws.audioscrobbler.com/2.0/?method=artist.getinfo&artist="+artist+"&autocorrect=1&api_key="+lastfm_api_key+"&format=json"
+	print "this is is the url artist_by_name sees " + url
+	data = urllib2.urlopen(url)
+	api_results = json.load(data)
+	print api_results
+	mbid = api_results['artist']['mbid']
+	artist = api_results['artist']['name']
+	# return_string = "Artist: %s mbid: %s" % (artist, mbid)
+	# return HttpResponse(return_string)
+
+	try:
+		a = Artist.objects.get(name__iexact = artist)
+		sound_set = a.sounds.all()
+		sounds = []
+		for sound in sound_set:
+			sounds.append({'artist':sound.artists.all()[0], 'title':sound.title, 'mbid':sound.mbid})
+	except:
+		sounds = []
 
 
+	releases, rgids = get_browse_releases('artist', mbid)
+	releases = check_if_follows(request, 'labels', releases)
+	releases = check_if_follows(request, 'artists', releases)
+	return render_to_response('scrapers/home.html',{'page':'artist', 'releases':releases, 'sounds':sounds}, context_instance=RequestContext(request))
 
 
+def all_sounds(request):
+	sound_set = Sound.objects.all()
+	sounds = []
+	for sound in sound_set:
+		if sound.yt_track_id:
+			track = {"type":"yt", "id":sound.yt_track_id}
+		elif sound.sc_track_id:
+			track = {"type":"sc", "id":sound.sc_track_id}
+		elif sound.vimeo_track_id:
+			track = {"type":"vimeo", "id":sound.vimeo_track_id}
+		else:
+			track = {"type":"text"}
+
+		if sound.artists.all():
+			track['artist'] = sound.artists.all()[0]
+			track['title'] = sound.title
+			# sounds.append({' ':sound.artists.all()[0], 'title':sound.title})
+			sounds.append(track)
+			print sound.title
+		else:
+			track['title'] = sound.original_slug
+			sounds.append(track)
+			# sounds.append({'title':sound.original_slug})
+
+	return render_to_response('scrapers/home.html',{'page':'my_sounds', 'sounds':sounds}, context_instance=RequestContext(request))
 
 
+def songs_by_source(request, source_id):
+	source = Source.objects.get(pk = source_id)
+	title = source.url
+	sound_set = source.sounds.all()
+	sounds = []
+	for sound in sound_set:
+		if sound.yt_track_id:
+			track = {"type":"yt", "id":sound.yt_track_id}
+		elif sound.sc_track_id:
+			track = {"type":"sc", "id":sound.sc_track_id}
+		elif sound.vimeo_track_id:
+			track = {"type":"vimeo", "id":sound.vimeo_track_id}
+		else:
+			track = {"type":"text"}
 
+		if sound.artists.all():
+			track['artist'] = sound.artists.all()[0]
+			track['title'] = sound.title
+			# sounds.append({' ':sound.artists.all()[0], 'title':sound.title})
+			sounds.append(track)
+			print sound.title
+		else:
+			track['title'] = sound.original_slug
+			sounds.append(track)
+			# sounds.append({'title':sound.original_slug})
 
-
-
-
-
-
-
-
-
-
+	return render_to_response('scrapers/home.html',{'page':'my_sounds', 'title': title, 'sounds':sounds}, context_instance=RequestContext(request))
 
 
 

@@ -111,6 +111,17 @@ class Release_group(models.Model):
 	mbz_releases = models.ManyToManyField(mbz_release, related_name = 'release_groups', blank=True, null=True)
 	date_released = models.DateTimeField(blank=True, null=True)
 
+class Release(models.Model):
+	date_released_string = models.CharField(max_length = 500, blank=True)
+	title = models.CharField(max_length = 500, blank=True)
+	artists = models.ManyToManyField(Artist, related_name = 'releases', blank=True, null=True)
+	labels = models.ManyToManyField(Label, related_name = 'releases', blank=True, null=True)
+	catalog_number = models.CharField(max_length = 500, blank=True)
+	primary_type= models.CharField(max_length = 500, blank=True)
+	secondary_types = models.CharField(max_length = 500, blank=True)
+	release_id = models.CharField(max_length = 500, blank=True)
+	release_group_id = models.CharField(max_length = 500, blank=True)
+
 
 class MixesDB_mix(models.Model):
 	artists = models.ManyToManyField(Artist, related_name = 'mixes', blank=True, null=True)
