@@ -72,12 +72,26 @@
             <li> <a href="/search">Search</a><li>
           </ul>
 
-    <!--            <form class="navbar-form navbar-left" role="search">
+
+<!--    <form action="/search" method="get">
+        {% csrf_token %}
+        Search for: 
+            <select id="query-type" name= 'query-type'>
+                <option value="artist">artist</option>
+                <option value="label">label</option>
+            </select>
+            <input type="text" name = "query" id = 'query'>
+            <input type="submit"/>
+        </form>
+ -->
+
+
+               <form action="/search" method="get" class="navbar-form navbar-left" role="search">
                 <div class="form-group">
-                  <input type="text" class="form-control" placeholder="Search">
+                  <input type="text" name = "query" id = 'query' class="form-control" placeholder="Search">
                 </div>
                 <button type="submit" class="btn btn-default">Search</button>
-              </form> -->
+              </form>
 
           <ul class="nav navbar-nav navbar-right">
             <li><a href = "#current-track" id = "now-playing">Artist-Title</a></li>
@@ -159,7 +173,9 @@
 
         {% if releases %}
 <!--         <ul> Releases: -->
+         <h2 > Releases </h2>
         {% for release in releases %}
+        <li class = "release">
             <div class="media album stream-item release" 
             data-artist = "{{release.artist}}"
             data-artist-id = "{{release.artist_id}}"
@@ -222,8 +238,7 @@
                   </ul>
                 </div>
               </div>
-<br>    
-
+            </li>
 
 <!-- 
 
@@ -271,9 +286,9 @@
         <h2>{{title}}</h2>
         {% endif %}
         {% if sounds %}
-        <h2 > Loved Songs </h2>
+        <h2 >Songs </h2>
 
-        <ul type=none>
+        <ul type=none id = "sounds">
         {% for sound in sounds%}
             <!-- <h5> -->
             <li class = " album-track track" data-artist = "{{sound.artist}}" data-title = "{{sound.title}}"
@@ -322,11 +337,12 @@
 
 
         {% if artists %}
-
-        <ul> Artists:
+        <h2 > Artists</h2>
+        <ul type = none id = "artists">
         {% for artist in artists %}
             <li class = 'artist' >
-                <img width="150" height="150" src="http://ws.audioscrobbler.com/2.0/?method=artist.imageredirect&amp;mbid={{artist.artist_id}}&amp;autocorrect=1&amp;size=largesquare&amp;api_key=c43db4e93f7608bb10d96fa5f69a74a1">
+                <!-- <img width="150" height="150" src="http://ws.audioscrobbler.com/2.0/?method=artist.imageredirect&amp;mbid={{artist.artist_id}}&amp;autocorrect=1&amp;size=largesquare&amp;api_key=c43db4e93f7608bb10d96fa5f69a74a1"> -->
+                <img width="150" height="150" src="http://ws.audioscrobbler.com/2.0/?method=artist.imageredirect&amp;artist={{artist.name|escape}}&amp;autocorrect=1&amp;size=largesquare&amp;api_key=c43db4e93f7608bb10d96fa5f69a74a1">
                 <div>
                 <a href = "/artist/{{artist.artist_id}}">  {{ artist.name }}</a>
                 <span >
@@ -342,8 +358,8 @@
         {% endif %}
 
         {% if labels %}
-
-        <ul> Labels:
+        <h2 > Labels </h2>
+        <ul type=none id = "labels">
         {% for label in labels %}
             <li><a href = "/label/{{label.label_id}}">  {{ label.name }}</a>
                 <span >

@@ -726,6 +726,162 @@ def songs_by_source(request, source_id):
 
 	return render_to_response('scrapers/home.html',{'page':'my_sounds', 'title': title, 'sounds':sounds}, context_instance=RequestContext(request))
 
+# def full_search(request):
+# 	if request.GET:
+# 		get = request.GET.copy()
+# 		query = get['query']
+# 		query = urllib.quote_plus(query.encode('utf8'))
+# 		# query_type = get['query-type']
+# 		print "query: " +query
+
+# 		album_url = "http://ws.audioscrobbler.com/2.0/?method=album.search&album="+query+"&api_key=c43db4e93f7608bb10d96fa5f69a74a1&format=json"
+# 		data = urllib2.urlopen(album_url)
+# 		album_results = json.load(data)
+# 		print album_url
+# 		releases = []
+# 		if album_results['results']['albummatches'] is not " ":
+# 			for album in album_results['results']['albummatches']['album']:
+# 				artist = album['artist']
+# 				title = album['name']
+# 				releases.append({'artist':artist,'title':title})
+			
+
+# 		artist_url = "http://ws.audioscrobbler.com/2.0/?method=artist.search&artist="+query+"&api_key=c43db4e93f7608bb10d96fa5f69a74a1&format=json"
+# 		print artist_url
+# 		data = urllib2.urlopen(artist_url)
+# 		artist_results = json.load(data)
+# 		artists = []
+# 		for artist in artist_results['results']['artistmatches']['artist']:
+# 			artist_name = artist['name']
+# 			artists.append({'artist':artist_name})
 
 
+
+# 		track_url = "http://ws.audioscrobbler.com/2.0/?method=track.search&track="+query+"&api_key=c43db4e93f7608bb10d96fa5f69a74a1&format=json"
+# 		data = urllib2.urlopen(album_url)
+# 		track_results = json.load(data)
+# 		tracks = []
+# 		for track in track_results['results']['trackmatches']['track']:
+# 			artist = track['artist']
+# 			title = track['title']
+# 			tracks.append({"artist":artist, 'title':title})
+
+
+
+# 		#query_type = get['query-type']
+# 		#query_type = 'artist'
+# 		api_results = mbz_search(query, query_type)
+# 		print "results search sees: "
+# 		print api_results
+# 		results = []
+
+# 		if query_type == 'label':
+# 			# query_type = 'labels'
+# 			for entry in api_results['labels']:
+# 				#print "api_results length: " + str(len(api_results))
+# 				# print "ENTRY: "
+# 				# print entry 
+# 				results.append({'name':entry['name'], 'label_id':entry['id']})
+# 				results = check_if_follows(request, 'labels', results)
+# 			return render_to_response('scrapers/home.html',{'page':'search', 'labels':results},context_instance=RequestContext(request))
+# 		if query_type == 'artist':
+# 			for entry in api_results['artist']:
+# 				results.append({'name':entry['name'], 'artist_id':entry['id']})
+# 				results = check_if_follows(request, 'artists', results)
+# 			return render_to_response('scrapers/home.html',{'page':'search', 'artists':results},context_instance=RequestContext(request))
+
+# 	else:
+# 		#return HttpResponse("No username")
+# 		return render_to_response('scrapers/home.html', {'page':'search'}, context_instance=RequestContext(request))
+
+def full_search(request):
+	if request.GET:
+		get = request.GET.copy()
+		query = get['query']
+		query = urllib.quote_plus(query.encode('utf8'))
+		# query_type = get['query-type']
+		print "query: " +query
+		#query_type = get['query-type']
+		#query_type = 'artist'
+		
+		api_results = mbz_search(query, 'label', limit=10)
+		print "results search sees: "
+		print api_results
+		labels = []
+		mbids = []
+	# while len(labels) < 5:
+		for entry in api_results['labels']:
+			if len(labels) < 5:
+				if entry["id"] not in mbids:
+					mbids.append(entry["id"])
+					#print "api_results length: " + str(len(api_results))
+					# print "ENTRY: "
+					# print entry 
+					labels.append({'name':entry['name'], 'label_id':entry['id']})
+					labels = check_if_follows(request, 'labels', labels)
+
+
+		
+		artist_url = "http://developer.echonest.com/api/v4/artist/extract?api_key=FBHCMLQRHBCWD8GVA&format=json&text="+query+"&results=10"
+		data = urllib2.urlopen(artist_url)
+		artist_results = json.load(data)
+		print artist_url
+		artists = []
+		for entry in artist_results['response']['artists']:
+			if len(artists) < 5:
+				artists.append({'name':entry['name']})
+				# artists = check_if_follows(request, 'artists', artists)
+
+
+		if not artists:
+			api_results = mbz_search(query, 'artist', limit=10)
+			print "results search sees: "
+			print api_results
+			artists = []
+		# while len(artists) < 5:
+			for entry in api_results['artist']:
+				if len(artists) < 5:
+					if entry["id"] not in mbids:
+						mbids.append(entry["id"])
+						artists.append({'name':entry['name'], 'artist_id':entry['id']})
+						artists = check_if_follows(request, 'artists', artists)
+
+		api_results = mbz_search(query, 'release-group', limit=10)
+		print "results search sees: "
+		print api_results
+		releases = []
+	# while len(artists) < 5:
+		for entry in api_results['release-groups']:
+			if len(releases) < 5:
+				if entry["id"] not in mbids:
+					mbids.append(entry["id"])
+					releases.append({'title':entry['title'], 'artist':entry['artist-credit'][0]['artist']['name']})
+					# releases = check_if_follows(request, 'artists', artists)
+		print releases
+
+
+	# 	api_results = mbz_search(query, 'recording', limit=10)
+	# 	print "results search sees: "
+	# 	print api_results
+	# 	recordings = []
+	# # while len(artists) < 5:
+	# 	for entry in api_results['recording']:
+	# 		if len(recordings) < 5:
+	# 			if entry["id"] not in mbids:
+	# 				mbids.append(entry["id"])
+	# 				recordings.append({'title':entry['title'], 'artist':entry['artist-credit'][0]['artist']['name']})
+	# 				# releases = check_if_follows(request, 'artists', artists)
+	# 	print recordings
+
+		track_url = "http://ws.audioscrobbler.com/2.0/?method=track.search&track="+query+"&api_key=c43db4e93f7608bb10d96fa5f69a74a1&format=json"
+		data = urllib2.urlopen(track_url)
+		track_results = json.load(data)
+		tracks = []
+		for track in track_results['results']['trackmatches']['track']:
+			artist = track['artist']
+			title = track['name']
+			tracks.append({"artist":artist, 'title':title})
+		recordings = tracks
+
+		return render_to_response('scrapers/home.html',{'page':'search', 'artists':artists, 'labels':labels, 'releases':releases, 'sounds':recordings},context_instance=RequestContext(request))
 
