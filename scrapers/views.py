@@ -438,66 +438,161 @@ def follow_toggle(request):
 				user_profile.save()
 				print "followed sound"
 
+		# if post['type'] == 'release':
+		# 	print "type: release "
+		# 	try:
+		# 		reid = post['reid']
+		# 	except:
+		# 		reid = ""
+
+		# 	artist = post['artist']
+		# 	title = post['title']
+
+		# 	artist, artist_created = Artist.objects.get_or_create(name = artist)
+
+		# 	if not artist_created:
+		# 		albums = artist.albums.all()
+		# 		albums = albums.get(title = title)
+		# 		if albums:
+		# 			album = albums[0]
+		# 		else:
+		# 			album = Album.objects.create(title = title)
+		# 			album.artists.add(artist)
+		# 			album.save()
+
+		# 		user_profile.add(album)
+		# 		user_profile.save()
+
+		# 	else:
+		# 		album = Album.create(title = title)
+		# 		album.artists.add(artist)
+		# 		album.save()
+		# 		user_profile.add(album)
+		# 		user_profile.save()
+
+		# 	album = Album.objects.get_or_create(title = title)
+		# 	if album[1]:
+
+		# 	# album = Album.create(title = title)
+		# 		album.artists.add(artist)
+		# 		if reid:
+		# 			album.album_type = "release"
+		# 			album.mbid = reid
+		# 		else:
+		# 			album.album_type = "scraped"
+
+		# 		album.save()
+
+
+
 		#release
-		if post['type'] == 'release':
-			print "type: release "
-			reid = post['reid']
-			print reid
-			release, release_created = Release.objects.get_or_create(release_id = reid)
-			print release 
-			if release_created:
-				url = "http://www.musicbrainz.org/ws/2/release/"+reid+"?fmt=json&inc=labels+release-groups+recordings+artist-credits"
-				print "This is the release url " + url
-				data = urllib2.urlopen(url)
-				api_results = json.load(data)
-				release.title = api_results['title']
-				release.save()
-				print "added release"
+		# if post['type'] == 'release':
+		# 	print "type: release "
+		# 	reid = post['reid']
+		# 	print reid
+		# 	release, release_created = Release.objects.get_or_create(release_id = reid)
+		# 	print release 
+		# 	if release_created:
+		# 		url = "http://www.musicbrainz.org/ws/2/release/"+reid+"?fmt=json&inc=labels+release-groups+recordings+artist-credits"
+		# 		print "This is the release url " + url
+		# 		data = urllib2.urlopen(url)
+		# 		api_results = json.load(data)
+		# 		release.title = api_results['title']
+		# 		release.save()
+		# 		print "added release"
 
-				release.date_released_string = api_results['date']
-				release.primary_type = api_results['release-group']['primary_type']
-				release.secondary_types = "".join(api_results['release-group']['secondary_types'])
+		# 		release.date_released_string = api_results['date']
+		# 		release.primary_type = api_results['release-group']['primary_type']
+		# 		release.secondary_types = "".join(api_results['release-group']['secondary_types'])
 
-				for label in api_results['label-info']:
-					try:
-						label_id = label['id']
-						label_name = label['name']
-						label, label_created = Label.objects.get_or_create(mbid = label_id)
-						label.save()
-						if label_created:
-							label.name = label_name
-							label.save()
-						release.labels.add(label)
-						release.save()
-					except:
-						print "no label info"
-					try:
-						release.catalog_number = label["catalog-number"]
-						release.save()
-					except:
-						print "no catalog number"
+		# 		for label in api_results['label-info']:
+		# 			try:
+		# 				label_id = label['id']
+		# 				label_name = label['name']
+		# 				label, label_created = Label.objects.get_or_create(mbid = label_id)
+		# 				label.save()
+		# 				if label_created:
+		# 					label.name = label_name
+		# 					label.save()
+		# 				release.labels.add(label)
+		# 				release.save()
+		# 			except:
+		# 				print "no label info"
+		# 			try:
+		# 				release.catalog_number = label["catalog-number"]
+		# 				release.save()
+		# 			except:
+		# 				print "no catalog number"
 
 
-				for artist in api_results['artist-credit']:
-					artist_id = artist['artist']['id']
-					artist = get_artist_by_mbid(artist_id)
-					release.artists.add(artist)
-					release.save()
+		# 		for artist in api_results['artist-credit']:
+		# 			artist_id = artist['artist']['id']
+		# 			artist = get_artist_by_mbid(artist_id)
+		# 			release.artists.add(artist)
+		# 			release.save()
 
-			if user_profile.releases.filter(release_id = reid).exists():
-				user_profile.releases.remove(releases)
-				user_profile.save()
-				print "unfollowed release"
+		# 	if user_profile.releases.filter(release_id = reid).exists():
+		# 		user_profile.releases.remove(releases)
+		# 		user_profile.save()
+		# 		print "unfollowed release"
 
-			else:
-				user_profile.releases.add(release)
-				user_profile.save()
-				print "followed release"
+		# 	else:
+		# 		user_profile.releases.add(release)
+		# 		user_profile.save()
+		# 		print "followed release"
 
 
 		return HttpResponse("you're logged in!! " + request.user.username)
 	else:
 		return HttpResponse('You must be logged in to do this', status=401)
+
+
+# def get_or_create_album_by_artist_and_title(artist, title):
+# 	url = "http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=c43db4e93f7608bb10d96fa5f69a74a1&artist="+artist+"&album="+title+"&autocorrect=1&format=json"
+# 	data = urllib2.urlopen(url)
+# 	results = json.load(data)
+# 	try:
+# 		mbid = results['album']['mbid']
+# 	except:
+# 		mbid = ""
+# 	artist = results['album']['artist']
+# 	title = results['album']['name']
+
+# 	artist, artist_created = Artist.objects.get_or_create(name = artist)
+
+# 	album, album_created = Album.objects.get_or_create(mbid = mbid)
+
+# 	if album_created:
+# 		album.title = title
+# 		album.album_type = "reid"
+# 		album.artists.add(artist)
+# 		album.save()
+
+# 	return album 
+
+
+
+def get_or_create_album_by_artist_and_title(artist, title):
+	artist, artist_created = Artist.objects.get_or_create(name = artist)
+	artist_albums = artist.albums.all()
+	filtered_albums = artist_albums.filter(title = title)
+	if not filtered_albums:
+		album = Album.objects.create(title = title)
+		album.artists.add(artist)
+		album.save()
+	else:
+		album = filtered_albums[0]
+	return album 
+
+
+
+
+
+# def get_or_create_album_by_reid(reid):
+# 	album, album_created = Album.objects.get_or_create(mbid = reid)
+# 	if album_created:
+
+# 		album = 
 
 	
 def get_english_alias(lookup_type, mbid):
@@ -818,7 +913,7 @@ def full_search(request):
 					# print "ENTRY: "
 					# print entry 
 					labels.append({'name':entry['name'], 'label_id':entry['id']})
-					labels = check_if_follows(request, 'labels', labels)
+					# labels = check_if_follows(request, 'labels', labels)
 
 
 		
@@ -844,20 +939,36 @@ def full_search(request):
 					if entry["id"] not in mbids:
 						mbids.append(entry["id"])
 						artists.append({'name':entry['name'], 'artist_id':entry['id']})
-						artists = check_if_follows(request, 'artists', artists)
+						# artists = check_if_follows(request, 'artists', artists)
 
-		api_results = mbz_search(query, 'release-group', limit=10)
+
+	# 	#search releases
+	# 	api_results = mbz_search(query, 'release-group', limit=10)
+	# 	print "results search sees: "
+	# 	print api_results
+	# 	releases = []
+	# # while len(artists) < 5:
+	# 	for entry in api_results['release-groups']:
+	# 		if len(releases) < 5:
+	# 			if entry["id"] not in mbids:
+	# 				mbids.append(entry["id"])
+	# 				releases.append({'title':entry['title'], 'artist':entry['artist-credit'][0]['artist']['name']})
+	# 				# releases = check_if_follows(request, 'artists', artists)
+	# 	print releases
+
+		#search releases
+		api_results = mbz_search(query, 'release', limit=10)
 		print "results search sees: "
 		print api_results
-		releases = []
-	# while len(artists) < 5:
-		for entry in api_results['release-groups']:
-			if len(releases) < 5:
-				if entry["id"] not in mbids:
-					mbids.append(entry["id"])
-					releases.append({'title':entry['title'], 'artist':entry['artist-credit'][0]['artist']['name']})
-					# releases = check_if_follows(request, 'artists', artists)
+		rgids = []
+		parsed_results = parse_releases(api_results, rgids)
+		releases = parsed_results['releases']
+		rgids = parsed_results['rgids']
+		releases = check_if_follows(request, 'labels', releases)
+		releases = check_if_follows(request, 'artists', releases)
 		print releases
+
+
 
 
 	# 	api_results = mbz_search(query, 'recording', limit=10)
@@ -880,8 +991,15 @@ def full_search(request):
 		for track in track_results['results']['trackmatches']['track']:
 			artist = track['artist']
 			title = track['name']
-			tracks.append({"artist":artist, 'title':title})
+			tracks.append({"artist":artist, 'title':title, 'type':'text'})
 		recordings = tracks
 
 		return render_to_response('scrapers/home.html',{'page':'search', 'artists':artists, 'labels':labels, 'releases':releases, 'sounds':recordings},context_instance=RequestContext(request))
+	
+	else:
+		return render_to_response('scrapers/home.html', {'page':'search'}, context_instance=RequestContext(request))
+
+
+def import_artists(request):
+	return render_to_response('scrapers/home.html',{'page':'advanced_search'},context_instance=RequestContext(request))
 

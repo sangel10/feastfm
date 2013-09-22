@@ -193,11 +193,14 @@ $('.love-album').click(function(e){
     // console.log($target);
     // console.log($target_parent);
     var reid = $(button).data('reid');
+    var artist = $(button).data('artist');
+    var title = $(button).data('album-title');
+    
     console.log(reid)
     //var artist_name = $($target_parent).data('artist');
     // console.log('artist id: ' +artist_id);
     // console.log('artist name: '+artist_name);
-    data = {'type':'release', 'reid':reid};
+    data = {'type':'release', 'reid':reid, 'artist':artist, 'title':title};
     $.ajax({
         type: "POST",
         url: "/follow_toggle/",
@@ -673,13 +676,13 @@ function play(element){
 
 
             var type = $(element).data('type');
-            console.log(type)
+            console.log("type", type)
 
             if(type !== "text"){
                 play_embed(element);
                 }
 
-            if (type === undefined || type ==="textStatus"){
+            if (type === undefined || type ==="text"){
 
                 console.log("track is not type text")
                 artist = unescape(artist);

@@ -63,13 +63,12 @@
             <span class="icon-bar"></span>
             <span class="icon-bar"></span>
           </button>
-          <a class="navbar-brand" href="#">Feast.fm</a>
+          <a class="navbar-brand" href="/">Feast.fm  <i>beta</i></a>
         </div>
         
         <div class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
             <li><a href = "/stream">Stream</a></li>
-            <li> <a href="/search">Search</a><li>
           </ul>
 
 
@@ -95,9 +94,13 @@
 
           <ul class="nav navbar-nav navbar-right">
             <li><a href = "#current-track" id = "now-playing">Artist-Title</a></li>
-            <li><button type="button" id ="play-previous" class="btn btn-default navbar-btn"><span class="glyphicon glyphicon-backward"></button></li>
-            <li><button type="button" id ="play-pause" class="btn btn-default navbar-btn"><span class="glyphicon glyphicon-play"></span>/<span class="glyphicon glyphicon-pause"></span></button></li>
-            <li><button type="button" id ="play-next" class="btn btn-default navbar-btn"><span class="glyphicon glyphicon-forward"></button></li>
+            <li><a>
+                <span class="glyphicon glyphicon-backward" id = "play-previous">
+                </a>
+
+            </li>
+            <li><a><span class="glyphicon glyphicon-play"></span>/<span class="glyphicon glyphicon-pause" id = "play-pause"></span></a></li>
+            <li><a><span class="glyphicon glyphicon-forward" id = "play-next"></a></li>
 
 
             <li class="dropdown">
@@ -106,6 +109,7 @@
                 <li><a href="/my_follows">Artists/Labels/Sites</a></li>
                 <li><a href="/my_sounds/">Loved Songs</a></li>
                 <li><a href="#">Playlists</a></li>
+                <li> <a href="/advanced_search">Import Artists/Labels</a><li>
               </ul>
             </li>
 
@@ -160,13 +164,13 @@
        <!--  <br>
         <button type="button" id ="track-seek">track.seek()</button>
  -->
-        <br></br>
+<!--         <br></br>
         <button type="button" id ="artist-sort">Sort by Artist</button>
         <button type="button" id="label-sort">Sort by Label</button>
         <button type="button" id="date-sort">Sort by Date</button>
         <button type="button" id="catalog-sort">Sort by Catalog Number </button>
         <button type="button" id="type-sort">Sort by Type of Release </button>
-
+ -->
 
         <!-- <img width="200" height="200" src="http://ws.audioscrobbler.com/2.0/?method=artist.imageredirect&amp;artist=JAY+Z+Picasso+Baby&amp;autocorrect=1&amp;size=largesquare&amp;api_key=a81521f42db5b48e3a474f30d1c9814d" class="to-begin-loading">
          -->
@@ -193,14 +197,20 @@
                 </a>
                 
                 <div class="media-body">
-                  <h3 class="media-heading"><a href = "/artist/{{ release.artist_id|escape }}"><strong>{{release.artist}}</strong>  </a> <button type = "button" class = "btn btn-default follow-artist" data-artist-id = "{{ release.artist_id }}" data-following-artist = "{{release.following_artist}}">{{release.following_artist}}</button>
+                  <h3 class="media-heading"><a href = "/artist_name/{{ release.artist|escape }}"><strong>{{release.artist}}</strong>  </a> <button type = "button" class = "btn btn-default follow-artist" data-artist-id = "{{ release.artist_id }}" data-following-artist = "{{release.following_artist}}">{{release.following_artist}}</button>
                     
                     <div class = "pull-right" >
                     <span class = "expand-album" >  
                         <a title = "Expand album" ><span data-reid = "{{release.reid}}" class="glyphicon glyphicon-chevron-down"></span></a>
                     </span>
 
-                    <a ><span data-reid = "{{release.reid}}"  class="glyphicon glyphicon-heart love-album"></span></a>
+                    <a ><span 
+                        data-reid = "{{release.reid}}" 
+                        data-album-title = "{{release.title}}" 
+                        data-artist = "{{release.artist}}" 
+                        class="glyphicon glyphicon-heart love-album">
+                    </span></a>
+                    
                     <a ><span title = "add to playlist" class="glyphicon glyphicon-plus"></span></a>    
                       <a title = "Play album" class = "btn btn-default"><span data-reid = "{{release.reid}}" class="glyphicon glyphicon-play play-entire-album"></span></a>
                     </div>
@@ -303,6 +313,7 @@
         </ul>
         {%endif %}
 
+    {% if page == 'advanced_search' %}
         <form action="/lastfm_search" method="get">
         {% csrf_token %}
         Last.FM Username: <input type="text" id = "username" name = "username">
@@ -320,7 +331,7 @@
         by SoundCloud Username: <input type="text" id = "username" name = "username">
         <input type="submit" value="search" />
         </form>
-
+    
 
 
         <form action="/search" method="get">
@@ -334,6 +345,7 @@
             <input type="submit"/>
         </form>
 
+    {% endif %}
 
 
         {% if artists %}
@@ -344,7 +356,7 @@
                 <!-- <img width="150" height="150" src="http://ws.audioscrobbler.com/2.0/?method=artist.imageredirect&amp;mbid={{artist.artist_id}}&amp;autocorrect=1&amp;size=largesquare&amp;api_key=c43db4e93f7608bb10d96fa5f69a74a1"> -->
                 <img width="150" height="150" src="http://ws.audioscrobbler.com/2.0/?method=artist.imageredirect&amp;artist={{artist.name|escape}}&amp;autocorrect=1&amp;size=largesquare&amp;api_key=c43db4e93f7608bb10d96fa5f69a74a1">
                 <div>
-                <a href = "/artist/{{artist.artist_id}}">  {{ artist.name }}</a>
+                <a href = "/artist_name/{{artist.name}}">  {{ artist.name }}</a>
                 <span >
                     <button type="button" data-artist-id = "{{ artist.artist_id }}" class ="follow-artist">
                         {{artist.following_artist}}

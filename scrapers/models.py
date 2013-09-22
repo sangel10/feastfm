@@ -1,6 +1,7 @@
 from django.db import models
 from django.contrib.auth.models import User
 from django.db.models.signals import post_save
+from datetime import datetime 
 
 # Create your models here.
 
@@ -22,6 +23,9 @@ class Sound(models.Model):
 
 	length = models.IntegerField(blank=True, null = True)
 	sound_duplicates = models.ManyToManyField('self', blank=True, null=True)
+
+	date_created = models.DateTimeField(default=datetime.now, blank=True)
+
 
 	def __unicode__(self):
 		if self.original_slug:
@@ -58,6 +62,7 @@ class Playlist(models.Model):
 
 	def __unicode__(self):
 		return self.name
+
 
 
 
@@ -143,6 +148,24 @@ class Mix_Series(models.Model):
 		return self.name
 
 
+class Album(models.Model):
+	title = models.CharField(max_length = 500, blank = True)
+	artists = models.ManyToManyField(Artist, related_name = "albums", blank=True, null = True)
+	full_title = models.CharField(max_length = 500, blank = True)
+	labels = models.ManyToManyField(Label, related_name = "albums", blank=True, null = True)
+
+	TYPE_CHOICES = (
+        ('scraped', 'scraped'),
+        ('release', 'release'),
+        ('release_group', 'release_group'),
+    )
+	album_type = models.CharField(max_length = 500,choices = TYPE_CHOICES, blank=True)
+	mbid = models.CharField(max_length = 500, blank = True)
+
+
+
+
+
 class UserProfile(models.Model):
     # This field is required.
     user = models.OneToOneField(User)
@@ -151,6 +174,8 @@ class UserProfile(models.Model):
     sources = models.ManyToManyField(Source, related_name = "users", blank=True, null = True)
     mix_series = models.ManyToManyField(Mix_Series, related_name = "users", blank=True, null = True)
     sounds = models.ManyToManyField(Sound, related_name = "users", blank=True, null = True)
+    albums = models.ManyToManyField(Album, related_name = "users", blank=True, null = True)
+
 
   #   def __unicode__(self):
 		# return self.user
@@ -160,5 +185,47 @@ def create_user_profile(sender, instance, created, **kwargs):
 		UserProfile.objects.create(user=instance)
 
 post_save.connect(create_user_profile, sender=User)
+
+
+
+
+class Embed(models.Model):
+	playlist_boolean = models.NullBooleanField()
+	host_id = models.CharField(max_length = 500, blank = True)
+	full_title = models.CharField(max_length = 500, blank = True)
+	username = models.CharField(max_length = 500, blank = True)
+	sounds = models.ManyToManyField(Sound, related_name = "embeds", blank=True, null = True)
+	HOST_CHOICES = (
+        ('sc', 'Soundcloud'),
+        ('yt', 'youtube'),
+        ('vimeo', 'vimeo'),
+    )
+	host = models.CharField(max_length = 500, choices=HOST_CHOICES, blank=True)
+
+
+
+
+
+class User_playlist_entry(models.Model):
+	sounds = models.ManyToManyField(Sound, related_name = "user_playlist_entries", blank=True, null = True)
+	embeds = models.ManyToManyField(Embed, related_name = "user_playlist_entries", blank=True, null = True)
+	albums = models.ManyToManyField(Album, related_name = "user_playlist_entries", blank=True, null = True)
+	position = models.IntegerField(blank=True, null = True)
+
+	
+
+
+class User_playlist(models.Model):
+	name = models.CharField(max_length = 500, blank = True)
+	user = models.ManyToManyField(UserProfile, related_name='user_playlists', blank=True, null=True)
+	entries =models.ManyToManyField(User_playlist_entry, related_name='user_playlists', blank=True, null=True)
+	date_created = models.DateTimeField(default=datetime.now, blank=True)
+
+
+
+
+
+
+
 
 

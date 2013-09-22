@@ -13,8 +13,10 @@ urlpatterns = patterns('',
     url(r'^artist/(?P<artist_id>[^/]+)/$', 'scrapers.views.artist_browse'),
     url(r'^artist_name/(?P<artist>[^/]+)/$', 'scrapers.views.artist_by_name'),
     url(r'^label/(?P<label_id>[^/]+)/$', 'scrapers.views.label'),
+   
     # url(r'^search/$', 'scrapers.views.search'),
     url(r'^search/$', 'scrapers.views.full_search'),
+    url(r'^advanced_search/$', 'scrapers.views.import_artists'),
     url(r'^lastfm_search/$', 'scrapers.views.lastfm_search'),
     url(r'^follow_toggle/$', 'scrapers.views.follow_toggle'),
     url(r'^stream/$', 'scrapers.views.stream'),
@@ -29,7 +31,9 @@ urlpatterns = patterns('',
 		CustomRegistrationView.as_view(),
     	name='registration_register',
     	),
-    url(r'^accounts/', include('registration.backends.simple.urls')),
+    # url(r'^accounts/', include('registration.backends.simple.urls')),
+
+    url(r'^accounts/', include('registration.urls')),
 
     # url(r'^feast/', include('feast.foo.urls')),
 
