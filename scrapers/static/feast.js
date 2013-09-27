@@ -127,8 +127,13 @@ $('.follow-artist').click(function(e){
     // var artist_name = $($target_parent).data('artist');
     var artist_id = $(button).data('artist-id');
     console.log('artist id: ' +artist_id);
+    // console.log("artist" +artist)
     // console.log('artist name: '+artist_name);
-    data = {'type':'artist', 'artist_id':artist_id,}; //'artist_name':artist_name};
+    $release = $(button).closest('.release');
+    console.log("this is the album element: "+$release)
+    artist_name = $($release).data("artist")
+    console.log("artist name is "+artist_name)
+    data = {'type':'artist', 'artist_id':artist_id, 'artist_name':artist_name};
     $.ajax({
         type: "POST",
         url: "/follow_toggle/",
@@ -200,10 +205,10 @@ $('.love-album').click(function(e){
     //var artist_name = $($target_parent).data('artist');
     // console.log('artist id: ' +artist_id);
     // console.log('artist name: '+artist_name);
-    data = {'type':'release', 'reid':reid, 'artist':artist, 'title':title};
+    data = {'type':'album', 'reid':reid, 'artist':artist, 'title':title};
     $.ajax({
         type: "POST",
-        url: "/follow_toggle/",
+        url: "/follow_album/",
         data: data,
         success: function(){
             //alert("it worked");
@@ -321,14 +326,17 @@ function expand_album(e, play_on_expand){
         $(tracklist).children("li").toggle();
     }
     else{
-        var reid = $($target).data('reid');
-        //var reid = $(this).data('reid');
-        if (reid !== undefined){
-            console.log("reid: "+reid)
-            ul = tracklist;
-            var data = {"reid": reid};
-            // var args = { type:"GET", url:"/album/", data:data, complete:done };
-            // $.ajax(args);
+        var reid = $(album).data('reid');
+        console.log("reid: "+reid)
+        var artist = $(album).data("artist");
+        console.log("artist: ", artist)
+        var title = $(album).data("album-title");
+        $ul = tracklist;
+
+        if (reid !== undefined && reid !== ""){
+            
+            var data = {"reid": reid, 'artist':artist, 'title':title};
+            // $.getJSON("/lastfm_album_tracks/", data, function(json){
             $.getJSON("/album_ajax/", data, function(json){
                 console.log("calling getJSON")
                 if(json['tracks']){
@@ -342,49 +350,10 @@ function expand_album(e, play_on_expand){
                         var following = json['tracks'][i]['following_sound']
                         var artist_id = ""
 
-                        // $(ul).append("<li class = 'album-track track' data-artist = '"+escape(artist) +"' data-title ='" + escape(title) +"' data-track-id = '"+track_id+"'>"+artist +" - "+ title+"<button type='button' class = 'like-track' data-track-id = '"+track_id+"'>"+following+"</button></li>");
+                        var $li = create_album_track(artist, title, track_id, following, artist_id);
+                        // $($ul).append("<li class = 'album-track track' data-artist = '"+escape(artist) +"' data-title ='" + escape(title) +"' data-track-id = '"+track_id+"'>"+artist +" - "+ title+"<button type='button' class = 'like-track' data-track-id = '"+track_id+"'>"+following+"</button></li>");
 
-                        var $li = $("<li>", {class:"album-track track"})
-
-                        // $($li).data("artist",artist);
-                        // $($li).data("title",title);
-                        // $($li).data("track-id", track_id);
-                        // $($li).data("following", following);
-
-                        $($li).attr("data-artist",artist);
-                        $($li).attr("data-title",title);
-                        $($li).attr("data-track-id", track_id);
-                        $($li).attr("data-following", following);
-
-                        var $play_a = $("<a>")
-                        var $play_span = $("<span>", {class:"glyphicon glyphicon-play play-track"})
-                        $($play_a).append($play_span);
-                        $($li).append($play_a);
-
-
-                        var $artist_a = $("<a>", {href:"/artist/"+artist_id})
-                        $artist_a.text(artist)
-                        $($li).append($artist_a)
-                        // console.log($artist_a)
-
-                        var $title_span = $("<span>", {text:" - "+title})
-                        $($li).append($title_span);
-
-
-                        var $love_a = $("<a>", {class:"pull-right", title:"Love Track"})
-                        var $love_span = $("<span>", {class:"glyphicon glyphicon-heart love-track"})
-                        if (following == true){
-                            $($love_span).addClass("red")
-                        }
-                        $($love_a).append($love_span);
-                        $($li).append($love_a);
-
-                        var $playlist_a = $("<a>", {class:"pull-right", title:"Add to Playlist"})
-                        var $playlist_span = $("<span>", {class:"glyphicon glyphicon-plus playlist-add"})
-                        $($playlist_a).append($playlist_span);
-                        $($li).append($playlist_a);
-
-                        $(ul).append($li)
+                        $($ul).append($li)
 
                     }
                 }
@@ -397,10 +366,89 @@ function expand_album(e, play_on_expand){
                     play_album(album)
 
                 }
+
+            })
+        }
+        else{
+
+            var data = {'artist':artist, 'title':title};
+            $.getJSON("/lastfm_album_tracks/", data, function(json){
+            // $.getJSON("/album_ajax/", data, function(json){
+                console.log("calling getJSON")
+                if(json['tracks']){
+                    //alert("json?: " + json["tracks"]+" reid: "+json['reid']);
+                    // var album = $('data-reid ='+)
+                    for(var i=0; i<json['tracks'].length; i++){
+                        //console.log(json['tracks'][i]['title'])
+                        var artist = json['tracks'][i]['artist']
+                        var title = json['tracks'][i]['title']
+                        var track_id = json['tracks'][i]['track_id']
+                        var following = json['tracks'][i]['following_sound']
+                        var artist_id = ""
+
+                        var $li = create_album_track(artist, title, track_id, following, artist_id);
+                        // $($ul).append("<li class = 'album-track track' data-artist = '"+escape(artist) +"' data-title ='" + escape(title) +"' data-track-id = '"+track_id+"'>"+artist +" - "+ title+"<button type='button' class = 'like-track' data-track-id = '"+track_id+"'>"+following+"</button></li>");
+
+                        $($ul).append($li)
+
+                    }
+                }
+                else{
+                    alert('no results')
+                }
+
+                if (play_on_expand){
+                    // $album = $(e.target).parents(".album")
+                    play_album(album)
+
+                }
+
             })
         }
     }
 }
+
+
+
+function create_album_track(artist, title, track_id, following, artist_id){
+    var $li = $("<li>", {class:"album-track track"})
+
+    $($li).attr("data-artist",artist);
+    $($li).attr("data-title",title);
+    $($li).attr("data-track-id", track_id);
+    $($li).attr("data-following", following);
+
+    var $play_a = $("<a>")
+    var $play_span = $("<span>", {class:"glyphicon glyphicon-play play-track"})
+    $($play_a).append($play_span);
+    $($li).append($play_a);
+
+
+    var $artist_a = $("<a>", {href:"/artist/"+artist_id})
+    $artist_a.text(artist)
+    $($li).append($artist_a)
+    // console.log($artist_a)
+
+    var $title_span = $("<span>", {text:" - "+title})
+    $($li).append($title_span);
+
+
+    var $love_a = $("<a>", {class:"pull-right", title:"Love Track"})
+    var $love_span = $("<span>", {class:"glyphicon glyphicon-heart love-track"})
+    if (following == true){
+        $($love_span).addClass("red")
+    }
+    $($love_a).append($love_span);
+    $($li).append($love_a);
+
+    var $playlist_a = $("<a>", {class:"pull-right", title:"Add to Playlist"})
+    var $playlist_span = $("<span>", {class:"glyphicon glyphicon-plus playlist-add"})
+    $($playlist_a).append($playlist_span);
+    $($li).append($playlist_a);
+
+    return $li;
+}
+
 
 function play_album($album){
     // console.log($album)

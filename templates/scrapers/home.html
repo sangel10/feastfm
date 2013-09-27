@@ -204,13 +204,22 @@
                         <a title = "Expand album" ><span data-reid = "{{release.reid}}" class="glyphicon glyphicon-chevron-down"></span></a>
                     </span>
 
+                    {% if release.following_album %}
+                        <a ><span 
+                        data-reid = "{{release.reid}}" 
+                        data-album-title = "{{release.title}}" 
+                        data-artist = "{{release.artist}}" 
+                        class="glyphicon glyphicon-heart love-album red">
+                    </span></a>
+                    {%else%}
                     <a ><span 
                         data-reid = "{{release.reid}}" 
                         data-album-title = "{{release.title}}" 
                         data-artist = "{{release.artist}}" 
                         class="glyphicon glyphicon-heart love-album">
                     </span></a>
-                    
+                    {% endif %}
+
                     <a ><span title = "add to playlist" class="glyphicon glyphicon-plus"></span></a>    
                       <a title = "Play album" class = "btn btn-default"><span data-reid = "{{release.reid}}" class="glyphicon glyphicon-play play-entire-album"></span></a>
                     </div>
@@ -305,7 +314,15 @@
             data-type = "{{sound.type}}" data-id = "{{sound.id}}"> 
                 <a><span class="glyphicon glyphicon-play play-track"></span></a>
                 <a href = "/artist_name/{{ sound.artist|urlencode }}">{{sound.artist}} </a> - {{sound.title}} 
-                <a class="pull-right" title="Love Track"><span class="glyphicon glyphicon-heart love-track"></span></a>
+                <a class="pull-right" title="Love Track">
+
+                    {% if sound.following_sound %}
+                        <span class="glyphicon glyphicon-heart love-track red" ></span>
+                    {% else %}
+                        <span class="glyphicon glyphicon-heart love-track" ></span>
+                    {% endif %}
+                    </a>
+                   
                 <a class="pull-right" title="Add to Playlist"><span class="glyphicon glyphicon-plus playlist-add"></span></a>
             <!-- </h5> -->
             </li>

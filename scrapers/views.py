@@ -124,6 +124,39 @@ def get_album_tracks(request):
 	# else:
 	# 	return HttpResponse('You must be logged in to do this', status=401)
 
+def get_album_tracks_lastfm(request):
+	# if request.user.is_authenticated():
+	print "album_tracks lastfm was just called"
+	get = request.GET.copy()
+	print get
+	reid = get["reid"]
+	artist = get["artist"]
+	artist = urllib.quote_plus(artist)
+	title = get["title"]
+	title = urllib.quote_plus(title)
+
+	url = "http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=c43db4e93f7608bb10d96fa5f69a74a1&artist="+artist+"&album="+title+"&autocomplete=1&format=json"
+	print "This is the get album tracks URL " + url
+	data = urllib2.urlopen(url)
+	api_results = json.load(data)
+	tracks = []
+	for track in api_results['album']['tracks']['track']:
+		artist = track['artist']['name']
+		title = track['name']
+		track_id = track['mbid']
+		tracks.append({'artist':artist, 'title':title, 'track_id':track_id})
+	# results = {'reid':reid, 'tracks':tracks}
+	tracks = check_if_follows(request,'sounds', tracks)
+	print "this is tracks on get album tracks"
+	print tracks
+	results = {'tracks':tracks}
+	#results = {"reid":reid, 'tracks':tracks}
+	return_json = simplejson.dumps(results)
+	return HttpResponse(return_json, mimetype='application/json')
+		#return HttpResponse("album page!!!")
+	# else:
+	# 	return HttpResponse('You must be logged in to do this', status=401)
+
 
 def artist_browse(request, artist_id):
 	releases, rgids = get_browse_releases('artist', artist_id)
@@ -360,10 +393,12 @@ def follow_toggle(request):
 
 		if post['type'] == 'artist':
 			print "type: artist "
-			# artist_name = post['artist_name']
+			artist_name = post['artist_name']
 			# print artist_name 
 			artist_id = post['artist_id']
-			artist = get_artist_by_mbid(artist_id)
+			artist, artist_created = Artist.objects.get_or_create(name = artist_name)
+			# artist = get_artist_by_mbid(artist_id, artist_name)
+
 			# print artist_id
 			# # artist_name = get_english_alias(artist_id)
 			# artist, artist_created = Artist.objects.get_or_create(mbid = artist_id)
@@ -373,7 +408,8 @@ def follow_toggle(request):
 			# 	artist.save()
 			# 	print "added artist"
 
-			if user_profile.artists.filter(mbid = artist_id).exists():
+			# if user_profile.artists.filter(mbid = artist_id).exists():
+			if user_profile.artists.filter(name = artist_name).exists():
 				user_profile.artists.remove(artist)
 				user_profile.save()
 				print "unfollowed artist"
@@ -547,6 +583,41 @@ def follow_toggle(request):
 		return HttpResponse('You must be logged in to do this', status=401)
 
 
+def follow_album(request):
+	if request.user.is_authenticated():
+		user = request.user
+		user_profile, up_created = UserProfile.objects.get_or_create(user = user)
+
+		post = request.POST.copy()
+		post_type = post['type']
+		print post_type
+		if post_type == 'album':
+			print "type: album "
+			# artist_name = post['artist_name']
+			# print artist_name 
+			artist_name = post['artist']
+			title = post['title']
+			reid = post['reid']
+
+			album = get_or_create_album_by_artist_and_title(artist_name, title, reid)
+			# artist = get_artist_by_mbid(artist_id)
+
+
+			if album in user_profile.albums.all():
+				user_profile.albums.remove(album)
+				user_profile.save()
+				print "unfollowed album"
+
+			else:
+				user_profile.albums.add(album)
+				user_profile.save()
+				print "followed album"
+
+		return HttpResponse("you're logged in!! " + request.user.username)
+	else:
+		return HttpResponse('You must be logged in to do this', status=401)
+
+
 # def get_or_create_album_by_artist_and_title(artist, title):
 # 	url = "http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=c43db4e93f7608bb10d96fa5f69a74a1&artist="+artist+"&album="+title+"&autocorrect=1&format=json"
 # 	data = urllib2.urlopen(url)
@@ -572,7 +643,7 @@ def follow_toggle(request):
 
 
 
-def get_or_create_album_by_artist_and_title(artist, title):
+def get_or_create_album_by_artist_and_title(artist, title, reid=""):
 	artist, artist_created = Artist.objects.get_or_create(name = artist)
 	artist_albums = artist.albums.all()
 	filtered_albums = artist_albums.filter(title = title)
@@ -652,18 +723,36 @@ def stream(request):
 def check_if_follows(request, model_type, list_of_entities):
 	if request.user.is_authenticated():
 		print "check if follows, user is authenticated"
+		#ARTISTS
 		if model_type == 'artists':
-	 		model_entries = request.user.get_profile().artists.all()
-	 		mbids = []
-		 	for entry in model_entries:
-		 		mbids.append(entry.mbid)
+	 		# model_entries = request.user.get_profile().artists.all()
+	 		# mbids = []
+		 	# for entry in model_entries:
+		 	# 	mbids.append(entry.mbid)
+		 	# for item in list_of_entities:
+		 	# 	if item['artist_id'] in mbids:
+		 	# 		item['following_artist'] = 'Following'
+		 	# 		# item['following_artist'] = True
+		 	# 	else:
+		 	# 		item['following_artist'] = 'Follow'
+		 	# 		# item['following_artist'] = False
+
+		 	model_entries = request.user.get_profile().artists.all()
 		 	for item in list_of_entities:
-		 		if item['artist_id'] in mbids:
+		 		try:
+		 			artist = item['name']
+		 		except KeyError:
+		 			artist = item['artist']
+		 		if model_entries.filter(name = artist).exists():
+
 		 			item['following_artist'] = 'Following'
 		 			# item['following_artist'] = True
 		 		else:
 		 			item['following_artist'] = 'Follow'
 		 			# item['following_artist'] = False
+
+
+		#LABELS
 	 	if model_type == 'labels':
 	 		model_entries = request.user.get_profile().labels.all()
 		 	mbids = []
@@ -676,20 +765,36 @@ def check_if_follows(request, model_type, list_of_entities):
 		 		else:
 		 			item['following_label'] = 'Follow'
 		 			# item['following_label'] = False
+		#SOUNDS
 		if model_type =='sounds':
 			model_entries = request.user.get_profile().sounds.all()
 		 	mbids = []
 		 	for entry in model_entries:
 		 		mbids.append(entry.mbid)
 		 	for item in list_of_entities:
-		 		if item['track_id'] in mbids:
+		 		if item['mbid'] in mbids:
 		 			# item['following_sound'] = "You Like This"
 		 			item['following_sound'] = True
+		 			print "following sound"
 		 		else:
 		 			# item['following_sound'] = 'Like'
 		 			item['following_sound'] = False
-
+		 			print "not following sound"
+		#ALBUMS
+		if model_type =='albums':
+			print "checking if following albums"
+			model_entries = request.user.get_profile().albums.all()
+			
+		 	for item in list_of_entities:
+		 		matches = model_entries.filter(artists__name__exact =item['artist'], title__iexact = item['title'])
+		 		if matches:
+		 			item['following_album'] = True
+		 			print "following album"
+		 		else:
+		 			item['following_album'] = False
+		 			print "not following album"
 		return list_of_entities
+
 	else:
 	 	for item in list_of_entities:
 	 		item['following_artist'] = 'Follow'
@@ -708,13 +813,20 @@ def my_follows(request):
 			artists.append({'name':artist.name, 'artist_id':artist.mbid})
 		artists = check_if_follows(request, 'artists', artists)
 
+		album_set = request.user.get_profile().albums.all()
+		albums = []
+		for album in album_set:
+			albums.append({'title': album.title, 'artist':album.artists.all()[0].name})
+		albums = check_if_follows(request, 'albums', albums)
+
+
 		label_set = request.user.get_profile().labels.all()
 		labels = []
 		for label in label_set:
 			labels.append({'name':label.name, 'label_id':label.mbid})
 		labels = check_if_follows(request, 'labels', labels)
 
-		return render_to_response('scrapers/home.html',{'page':'my_follows', 'artists':artists, 'labels':labels}, context_instance=RequestContext(request))
+		return render_to_response('scrapers/home.html',{'page':'my_follows', 'artists':artists, 'labels':labels, 'releases':albums}, context_instance=RequestContext(request))
 
 	else:
 		return HttpResponse("You need to be logged in to see followed artists and labels")
@@ -725,6 +837,7 @@ def my_sounds(request):
 		sounds = []
 		for sound in sound_set:
 			sounds.append({'artist':sound.artists.all()[0], 'title':sound.title, 'mbid':sound.mbid})
+			sounds = check_if_follows(request, 'sounds', sounds)
 		# artists = check_if_follows(request, 'artists', artists)
 
 		# label_set = request.user.get_profile().labels.all()
@@ -763,6 +876,7 @@ def artist_by_name(request, artist):
 	releases, rgids = get_browse_releases('artist', mbid)
 	releases = check_if_follows(request, 'labels', releases)
 	releases = check_if_follows(request, 'artists', releases)
+	releases = check_if_follows(request, 'albums', releases)
 	return render_to_response('scrapers/home.html',{'page':'artist', 'releases':releases, 'sounds':sounds}, context_instance=RequestContext(request))
 
 
@@ -899,12 +1013,12 @@ def full_search(request):
 		#query_type = get['query-type']
 		#query_type = 'artist'
 		
+		#LABEL
 		api_results = mbz_search(query, 'label', limit=10)
 		print "results search sees: "
 		print api_results
 		labels = []
 		mbids = []
-	# while len(labels) < 5:
 		for entry in api_results['labels']:
 			if len(labels) < 5:
 				if entry["id"] not in mbids:
@@ -913,10 +1027,10 @@ def full_search(request):
 					# print "ENTRY: "
 					# print entry 
 					labels.append({'name':entry['name'], 'label_id':entry['id']})
-					# labels = check_if_follows(request, 'labels', labels)
+					labels = check_if_follows(request, 'labels', labels)
 
 
-		
+		# ARTIST		
 		artist_url = "http://developer.echonest.com/api/v4/artist/extract?api_key=FBHCMLQRHBCWD8GVA&format=json&text="+query+"&results=10"
 		data = urllib2.urlopen(artist_url)
 		artist_results = json.load(data)
@@ -925,7 +1039,7 @@ def full_search(request):
 		for entry in artist_results['response']['artists']:
 			if len(artists) < 5:
 				artists.append({'name':entry['name']})
-				# artists = check_if_follows(request, 'artists', artists)
+				artists = check_if_follows(request, 'artists', artists)
 
 
 		if not artists:
@@ -966,6 +1080,7 @@ def full_search(request):
 		rgids = parsed_results['rgids']
 		releases = check_if_follows(request, 'labels', releases)
 		releases = check_if_follows(request, 'artists', releases)
+		releases = check_if_follows(request, 'albums', releases)
 		print releases
 
 

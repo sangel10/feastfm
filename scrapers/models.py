@@ -162,7 +162,8 @@ class Album(models.Model):
 	album_type = models.CharField(max_length = 500,choices = TYPE_CHOICES, blank=True)
 	mbid = models.CharField(max_length = 500, blank = True)
 
-
+	def __unicode__(self):
+		return self.title
 
 
 
@@ -177,8 +178,8 @@ class UserProfile(models.Model):
     albums = models.ManyToManyField(Album, related_name = "users", blank=True, null = True)
 
 
-  #   def __unicode__(self):
-		# return self.user
+    def __unicode__(self):
+		return self.user
 
 def create_user_profile(sender, instance, created, **kwargs):
 	if created:
@@ -201,7 +202,9 @@ class Embed(models.Model):
         ('vimeo', 'vimeo'),
     )
 	host = models.CharField(max_length = 500, choices=HOST_CHOICES, blank=True)
-
+    
+	def __unicode__(self):
+		return self.full_title
 
 
 
@@ -217,13 +220,23 @@ class User_playlist_entry(models.Model):
 
 class User_playlist(models.Model):
 	name = models.CharField(max_length = 500, blank = True)
-	user = models.ManyToManyField(UserProfile, related_name='user_playlists', blank=True, null=True)
+	users = models.ManyToManyField(UserProfile, related_name='user_playlists', blank=True, null=True)
 	entries =models.ManyToManyField(User_playlist_entry, related_name='user_playlists', blank=True, null=True)
 	date_created = models.DateTimeField(default=datetime.now, blank=True)
+	
+	def __unicode__(self):
+		return self.name
 
 
+# class ArtistName(models.Model):
+# 	name = models.CharField(max_length = 500, blank = True)
+# 	artists = models.ManyToManyField(Artist, related_name = "artist_names", blank=True, null = True)
+# 	sounds = models.ManyToManyField(Sound, related_name = "artist_names", blank=True, null = True)
+# 	albums = models.ManyToManyField(Album, related_name = "artist_names", blank=True, null = True)
+# 	users = models.ManyToManyField(UserProfile, related_name='artist_names', blank=True, null=True)
 
-
+# 	def __unicode__(self):
+# 		return self.name
 
 
 
