@@ -10,6 +10,7 @@ from datetime import datetime
 class Sound(models.Model):
 	original_slug = models.CharField(max_length = 500)
 	title = models.CharField(max_length = 500, blank=True)
+	artist_name = models.CharField(max_length = 500, blank=True)
 
 	yt_track_id = models.CharField(max_length = 500, blank=True)
 	sc_track_id = models.CharField(max_length = 500, blank=True)
@@ -153,14 +154,17 @@ class Album(models.Model):
 	artists = models.ManyToManyField(Artist, related_name = "albums", blank=True, null = True)
 	full_title = models.CharField(max_length = 500, blank = True)
 	labels = models.ManyToManyField(Label, related_name = "albums", blank=True, null = True)
+	artist_name =models.CharField(max_length = 500, blank = True)
 
-	TYPE_CHOICES = (
-        ('scraped', 'scraped'),
-        ('release', 'release'),
-        ('release_group', 'release_group'),
-    )
-	album_type = models.CharField(max_length = 500,choices = TYPE_CHOICES, blank=True)
-	mbid = models.CharField(max_length = 500, blank = True)
+	# TYPE_CHOICES = (
+ #        ('scraped', 'scraped'),
+ #        ('release', 'release'),
+ #        ('release_group', 'release_group'),
+ #    )
+	# album_type = models.CharField(max_length = 500,choices = TYPE_CHOICES, blank=True)
+	reid = models.CharField(max_length = 500, blank = True)
+	reid = models.CharField(max_length = 500, blank = True)
+	scraped = models.BooleanField(default = False)
 
 	def __unicode__(self):
 		return self.title

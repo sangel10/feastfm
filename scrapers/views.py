@@ -374,14 +374,66 @@ def mbz_search(query, query_type, limit =100):
 	return api_results
 
 
-def get_artist_by_mbid(artist_id):
+
+
+def get_artist_by_mbid(artist_id, artist_name):
 	artist, artist_created = Artist.objects.get_or_create(mbid = artist_id)
 	print artist 
 	if artist_created:
-		artist.name = get_english_alias('artist', artist_id)
+		# artist.name = get_english_alias('artist', artist_id)
+		artist.name = artist_name
 		artist.save()
 		print "added artist"
 	return artist
+
+def get_label_by_mbid(label_id, label_name):
+	label, label_created = Label.objects.get_or_create(mbid = label_id)
+	print label 
+	if label_created:
+		# label.name = get_english_alias('label', label_id)
+		label.name = label_name
+		label.save()
+		print "added label"
+	return label
+
+def get_album_by_reid(artist_id, artist_name, title, reid):
+
+	album, album_created = Album.objects.get_or_create(mbid = reid)
+	print album
+	
+	
+	if album_created:
+		artist = get_artist_by_mbid(artist_id, artist_name)
+		album.title = title
+		album.artists.add(artist)
+		# album.name = get_english_alias('label', label_id)
+		album.save()
+		print "added album"
+	return album
+
+def get_sound_by_mbid(sound_id, artist_id, artist_name, title):
+	sound, sound_created = Sound.objects.get_or_create(mbid = sound_id)
+	print sound
+
+	if sound_created:
+		artist = get_artist_by_mbid(artist_id, artist_name)
+		sound.title = title
+		sound.artists.add(artist)
+		sound.save()
+		print "sound added"
+	return sound
+
+
+
+
+def get_sound_without_mbid(artist_name, title):
+	sound, sound_created = Sound.objects.get_or_create(title = title, artist_name = artist_name)
+	return sound
+
+def get_album_without_mbid(artist_name, title):
+	album, album_created = Album.objects.get_or_create(title =title, artist_name = artist_name)
+	return album 
+
 
 
 def follow_toggle(request):
@@ -786,7 +838,7 @@ def check_if_follows(request, model_type, list_of_entities):
 			model_entries = request.user.get_profile().albums.all()
 			
 		 	for item in list_of_entities:
-		 		matches = model_entries.filter(artists__name__exact =item['artist'], title__iexact = item['title'])
+		 		matches = model_entries.filter(artists__name__iexact =item['artist'], title__iexact = item['title'])
 		 		if matches:
 		 			item['following_album'] = True
 		 			print "following album"

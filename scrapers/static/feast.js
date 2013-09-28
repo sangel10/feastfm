@@ -25,6 +25,11 @@ $(document).ready(function(){
 // };
 
 
+var h=$(window).height();
+console.log(h)
+$('.scrollable').height(h+'px');
+
+
 $("#track-seek").click(function(){
     track.seek(30);
 });
