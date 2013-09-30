@@ -172,11 +172,12 @@ $('.follow-label').click(function(e){
     // console.log($target);
     // console.log($target_parent);
     var label_id = $(button).data('label-id');
+    var label_name = $(button).data('label-name');
     console.log(label_id)
     //var artist_name = $($target_parent).data('artist');
     // console.log('artist id: ' +artist_id);
     // console.log('artist name: '+artist_name);
-    data = {'type':'label', 'label_id':label_id,};
+    data = {'type':'label', 'label_id':label_id, 'label_name':label_name};
     $.ajax({
         type: "POST",
         url: "/follow_toggle/",
@@ -353,7 +354,7 @@ function expand_album(e, play_on_expand){
                         var title = json['tracks'][i]['title']
                         var track_id = json['tracks'][i]['track_id']
                         var following = json['tracks'][i]['following_sound']
-                        var artist_id = ""
+                        var artist_id = json['tracks'][i]['artist_id']
 
                         var $li = create_album_track(artist, title, track_id, following, artist_id);
                         // $($ul).append("<li class = 'album-track track' data-artist = '"+escape(artist) +"' data-title ='" + escape(title) +"' data-track-id = '"+track_id+"'>"+artist +" - "+ title+"<button type='button' class = 'like-track' data-track-id = '"+track_id+"'>"+following+"</button></li>");
@@ -419,6 +420,7 @@ function create_album_track(artist, title, track_id, following, artist_id){
     var $li = $("<li>", {class:"album-track track"})
 
     $($li).attr("data-artist",artist);
+    $($li).attr("data-artist-id",artist_id);
     $($li).attr("data-title",title);
     $($li).attr("data-track-id", track_id);
     $($li).attr("data-following", following);

@@ -133,7 +133,7 @@
       </div>
     </div>
 
-<div class = "row">
+<!-- <div class = "row"> -->
     <div class="container col-md-8 scrollable"> <!-- col-md-offset-0 -->
 
 
@@ -237,7 +237,7 @@
                     </span>
 
                   </h3>
-                  <h4><a class = "label-link" href = "/label/{{ release.label_id|escape }}" >{{release.label}}</a><button type = "button" class = "btn btn-default follow-label" data-label-id = "{{ release.label_id }}">{{release.following_label}}</button></h4>
+                  <h4><a class = "label-link" href = "/label/{{ release.label_id|escape }}" >{{release.label}}</a><button type = "button" class = "btn btn-default follow-label" data-label-id = "{{ release.label_id }}" data-label-name = "{{ release.label }}">{{release.following_label}}</button></h4>
                   <h5 class = "catalog-number">{{release.cat_num}}</h5>
                   <h5 class = "date">{{release.date}}</h5>
                   <h4>
@@ -313,7 +313,7 @@
         <ul type=none id = "sounds">
         {% for sound in sounds%}
             <!-- <h5> -->
-            <li class = " album-track track" data-artist = "{{sound.artist}}" data-title = "{{sound.title}}"
+            <li class = " album-track track" data-artist-id = "{sound.artist_name}"data-artist = "{{sound.artist}}" data-title = "{{sound.title}}"
             data-type = "{{sound.type}}" data-id = "{{sound.id}}"> 
                 <a><span class="glyphicon glyphicon-play play-track"></span></a>
                 <a href = "/artist_name/{{ sound.artist|urlencode }}">{{sound.artist}} </a> - {{sound.title}} 
@@ -395,7 +395,7 @@
         {% for label in labels %}
             <li><a href = "/label/{{label.label_id}}">  {{ label.name }}</a>
                 <span >
-                    <button type="button" data-label-id = "{{ label.label_id }}" class ="follow-label">
+                    <button type="button" data-label-name = "{{ label.name }}" data-label-id = "{{ label.label_id }}" class ="follow-label">
                         {{label.following_label}}
                     </button>
                 </span>
@@ -410,7 +410,7 @@
     <div class="container col-md-4 scrollable">
         TEST
     </div>
-</div>
+<!-- </div> -->
 
 
 

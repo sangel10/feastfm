@@ -11,9 +11,13 @@ import datetime
 from django.template import RequestContext
 import simplejson
 
+
+
 from django.contrib.auth.decorators import login_required
 from scrapers.models import *
+import musicbrainzngs as mbz
 
+mbz.set_useragent("feast", "0.0.0", "santiagoangel10@gmail.com")
 
 sc_client_id = 'a0b4638bae6d50a9296f7fc3f35442eb'
 lastfm_api_key = "c43db4e93f7608bb10d96fa5f69a74a1"
@@ -110,9 +114,10 @@ def get_album_tracks(request):
 	for entry in api_results['media']:
 		for track in entry['tracks']:
 			artist = track['artist-credit'][0]['name']
+			artist_id = track['artist-credit'][0]['artist']['id']
 			title = track['recording']['title']
 			track_id = track['recording']['id']
-			tracks.append({'artist':artist, 'title':title, 'track_id':track_id})
+			tracks.append({'artist':artist, 'title':title, 'track_id':track_id, 'artist_id':artist_id})
 	# results = {'reid':reid, 'tracks':tracks}
 	tracks = check_if_follows(request,'sounds', tracks)
 	print "this is tracks on get album tracks"
@@ -376,63 +381,64 @@ def mbz_search(query, query_type, limit =100):
 
 
 
-def get_artist_by_mbid(artist_id, artist_name):
-	artist, artist_created = Artist.objects.get_or_create(mbid = artist_id)
-	print artist 
-	if artist_created:
-		# artist.name = get_english_alias('artist', artist_id)
-		artist.name = artist_name
-		artist.save()
-		print "added artist"
-	return artist
+# def get_artist_by_mbid(artist_id, artist_name):
+# 	artist, artist_created = Artist.objects.get_or_create(mbid = artist_id)
+# 	print artist 
+# 	if artist_created:
+# 		# artist.name = get_english_alias('artist', artist_id)
+# 		artist.name = artist_name
+# 		artist.save()
+# 		print "added artist"
+# 	return artist
 
-def get_label_by_mbid(label_id, label_name):
-	label, label_created = Label.objects.get_or_create(mbid = label_id)
-	print label 
-	if label_created:
-		# label.name = get_english_alias('label', label_id)
-		label.name = label_name
-		label.save()
-		print "added label"
-	return label
+# def get_label_by_mbid(label_id, label_name):
+# 	label, label_created = Label.objects.get_or_create(mbid = label_id)
+# 	print label 
+# 	if label_created:
+# 		# label.name = get_english_alias('label', label_id)
+# 		label.name = label_name
+# 		label.save()
+# 		print "added label"
+# 	return label
 
-def get_album_by_reid(artist_id, artist_name, title, reid):
+# def get_album_by_reid(artist_id, artist_name, title, reid):
 
-	album, album_created = Album.objects.get_or_create(mbid = reid)
-	print album
+# 	album, album_created = Album.objects.get_or_create(mbid = reid)
+# 	print album
 	
 	
-	if album_created:
-		artist = get_artist_by_mbid(artist_id, artist_name)
-		album.title = title
-		album.artists.add(artist)
-		# album.name = get_english_alias('label', label_id)
-		album.save()
-		print "added album"
-	return album
+# 	if album_created:
+# 		artist = get_artist_by_mbid(artist_id, artist_name)
+# 		album.title = title
+# 		album.artists.add(artist)
+# 		# album.name = get_english_alias('label', label_id)
+# 		album.save()
+# 		print "added album"
+# 	return album
 
-def get_sound_by_mbid(sound_id, artist_id, artist_name, title):
-	sound, sound_created = Sound.objects.get_or_create(mbid = sound_id)
-	print sound
+# def get_sound_by_mbid(sound_id, artist_id, artist_name, title):
+# 	sound, sound_created = Sound.objects.get_or_create(mbid = sound_id)
+# 	print sound
 
-	if sound_created:
-		artist = get_artist_by_mbid(artist_id, artist_name)
-		sound.title = title
-		sound.artists.add(artist)
-		sound.save()
-		print "sound added"
-	return sound
-
-
+# 	if sound_created:
+# 		artist = get_artist_by_mbid(artist_id, artist_name)
+# 		sound.title = title
+# 		sound.artists.add(artist)
+# 		sound.save()
+# 		print "sound added"
+# 	return sound
 
 
-def get_sound_without_mbid(artist_name, title):
-	sound, sound_created = Sound.objects.get_or_create(title = title, artist_name = artist_name)
-	return sound
 
-def get_album_without_mbid(artist_name, title):
-	album, album_created = Album.objects.get_or_create(title =title, artist_name = artist_name)
-	return album 
+# def get_sound_without_mbid(artist_name, title):
+# 	sound, sound_created = Sound.objects.get_or_create(title = title, artist_name = artist_name)
+# 	return sound
+
+# def get_album_without_mbid(artist_name, title):
+# 	album, album_created = Album.objects.get_or_create(title =title, artist_name = artist_name)
+# 	return album 
+
+
 
 
 
@@ -448,20 +454,11 @@ def follow_toggle(request):
 			artist_name = post['artist_name']
 			# print artist_name 
 			artist_id = post['artist_id']
-			artist, artist_created = Artist.objects.get_or_create(name = artist_name)
-			# artist = get_artist_by_mbid(artist_id, artist_name)
+			# artist, artist_created = Artist.objects.get_or_create(name = artist_name)
+			artist = get_artist_by_mbid(artist_id, artist_name)
 
-			# print artist_id
-			# # artist_name = get_english_alias(artist_id)
-			# artist, artist_created = Artist.objects.get_or_create(mbid = artist_id)
-			# print artist 
-			# if artist_created:
-			# 	artist.name = get_english_alias('artist', artist_id)
-			# 	artist.save()
-			# 	print "added artist"
-
-			# if user_profile.artists.filter(mbid = artist_id).exists():
-			if user_profile.artists.filter(name = artist_name).exists():
+			if artist in user_profile.artists.all():
+			# if user_profile.artists.filter(name = artist_name).exists():
 				user_profile.artists.remove(artist)
 				user_profile.save()
 				print "unfollowed artist"
@@ -472,19 +469,16 @@ def follow_toggle(request):
 				print "followed artist"
 
 
-		if post['type'] == 'label':
+		elif post['type'] == 'label':
 			print "type: label "
 			label_id = post['label_id']
+			lable_name = post['label_name']
 			print label_id
-			# artist_name = get_english_alias(artist_id)
-			label, label_created = Label.objects.get_or_create(mbid = label_id)
-			print label 
-			if label_created:
-				label.name = get_english_alias('label', label_id)
-				label.save()
-				print "added label"
 
-			if user_profile.labels.filter(mbid = label_id).exists():
+			label = get_label_by_mbid(label_id, label_name)
+
+			if label in user_profile.labels.all():
+			# if user_profile.labels.filter(mbid = label_id).exists():
 				user_profile.labels.remove(label)
 				user_profile.save()
 				print "unfollowed label"
@@ -495,7 +489,7 @@ def follow_toggle(request):
 				print "followed label"
 
 		# try:
-		if post['type'] == 'track':
+		elif post['type'] == 'track':
 			pass
 			print "type: track "
 			track_id = post['track_id']
@@ -803,7 +797,6 @@ def check_if_follows(request, model_type, list_of_entities):
 		 			item['following_artist'] = 'Follow'
 		 			# item['following_artist'] = False
 
-
 		#LABELS
 	 	if model_type == 'labels':
 	 		model_entries = request.user.get_profile().labels.all()
@@ -824,7 +817,7 @@ def check_if_follows(request, model_type, list_of_entities):
 		 	for entry in model_entries:
 		 		mbids.append(entry.mbid)
 		 	for item in list_of_entities:
-		 		if item['mbid'] in mbids:
+		 		if item['track_id'] in mbids:
 		 			# item['following_sound'] = "You Like This"
 		 			item['following_sound'] = True
 		 			print "following sound"
