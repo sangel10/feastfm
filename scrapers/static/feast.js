@@ -1,4 +1,3 @@
-
 $(document).ready(function(){
 
 
@@ -215,6 +214,7 @@ $('.love-album').click(function(e){
     $.ajax({
         type: "POST",
         url: "/follow_album/",
+        // url: "/follow_toggle/",
         data: data,
         success: function(){
             //alert("it worked");
@@ -226,9 +226,164 @@ $('.love-album').click(function(e){
                 $(button).addClass("red");
             }
         },
-        })
+    })
 
 })
+
+// for albums
+$(".add-album").click(function(e){
+    addPopover(e, 'album-to-playlist')
+})
+
+$(document).on('click', ".add-track", function(e) {
+// $(".add-track").on('click',function(e){
+    console.log("add-track clicked  ")
+    addPopover(e, 'track-to-playlist')
+})
+
+function addPopover(e, add_class){
+    var $target = $(e.target)
+    // data = {'type':'album', 'reid':reid, 'artist':artist, 'title':title};
+    // var popover = $($target).next(".popover")
+    // console.log($($target).next(".popover"))
+
+    if ($($target).next(".popover").length>0){
+        // $(".add-album").next(".popover").toggle()
+        // $($target).popover("toggle")
+        $($target).next(".popover").toggle()
+        // $($target).popover("destroy")
+        console.log("popover exists");
+    }
+    else{
+    console.log("popover does not exist")
+
+
+    $.ajax({
+        url: "/get_playlists/",
+        }).done(function(data){
+            console.log(".done worked, this is the data");
+            console.log(data);
+            var $div = $('<div>');
+            var $create = $('<div><a href = "/create_playlist/">Create Playlist</a></div><br></br>');
+            $($div).append($create)
+
+
+            var playlists = data['playlists']
+            console.log('playlists: ', playlists)
+
+            for(i=0; i< playlists.length; i++){
+
+                console.log("looping through playlist")
+                var name = playlists[i]['name']
+                console.log("playlist name: ", name)
+                var $a = $('<a>')
+                $($a).attr("href", "/playlist/"+playlists[i]['pk'])
+                $($a).text(playlists[i]['name']+ " ")
+                var $add_button = $("<button>", {class:"btn btn-default "+add_class, type:"button", "data-playlist-id":playlists[i]['pk']})
+                $($add_button).text("Add")
+                
+                var $div2 = $("<div>", {class: "playlist", 'data-playlist-id':playlists[i]['pk']})
+                $div2.append($a)
+                $div2.append($add_button)
+                $div.append($div2)
+            }
+
+            // $('body').popover({
+            //         selector: '[rel=popover]'
+            // })
+            console.log('$div: ', $div)
+            console.log("$target: ", $target)
+            $target.popover(
+                {placement:'bottom', 
+                html:true, 
+                content: $div,
+                trigger: 'focus',
+                toggle: 'popover',
+                selector: '[rel="popover"]',
+                // content: "<a href = '/create_playlist'>Create New Playlist</a><span><a class = btn btn-default>Add</a></span>"
+            })
+            $target.popover('show')
+        })
+    }
+}
+
+
+$(document).on('click', ".track-to-playlist", function(e){
+    console.log('popover add button clicked')
+    var $target = $(e.target)
+    var $playlist = $(e.target).closest(".playlist")
+    var playlist_id = $($playlist).data("playlist-id")
+
+    var $track = $($target).closest(".track")
+    var artist_name = $($track).data("artist")
+    var artist_id = $($track).data("artist-id")
+    var title = $($track).data("title")
+    var mbid = $($track).data("track-id")
+
+    data = {'playlist_id':playlist_id, 'artist_name':artist_name, 'artist_id':artist_id, 'title':title, 'mbid':mbid};
+    console.log(data)
+    $.ajax({
+        type: "POST",
+        url: "/track_to_playlist/",
+        // url: "/follow_toggle/",
+        data: data,
+    }).done(function(){
+        alert("track was added to playlist")
+    })
+})
+
+
+
+$(document).on('click', ".album-to-playlist", function(e){
+    console.log('popover add button clicked')
+    var $target = $(e.target)
+    var $playlist = $(e.target).closest(".playlist")
+    var playlist_id = $($playlist).data("playlist-id")
+
+
+    var $album = $($target).closest(".album")
+    var artist_name = $($album).data("artist")
+    var artist_id = $($album).data("artist-id")
+    var title = $($album).data("album-title")
+    var reid = $($album).data("reid")
+
+    data = {'playlist_id':playlist_id, 'artist_name':artist_name, 'artist_id':artist_id, 'title':title, 'reid':reid};
+    console.log(data)
+    $.ajax({
+        type: "POST",
+        url: "/album_to_playlist/",
+        // url: "/follow_toggle/",
+        data: data,
+    }).done(function(){
+        alert("album was added to playlist")
+    })
+
+
+
+})
+//     // var $target = $(e.target)
+//     // var playlist_id = $($target).data("playlist-id")
+//     // var album_title
+//     // var artist
+//     // var artist_id
+//     // var album_id  =
+
+
+
+    // call back end to get user playlists
+
+    // write 'content'
+    // generate popover, include content
+
+
+    // var $target = $(e.target)
+
+
+    // toggle popover
+
+    // $(".glyphicon-plus").popover({placement:'bottom', 
+    //     html:true, 
+    //     content: "<a href = '/create_playlist'>Create New Playlist</a><span><a class = btn btn-default>Add</a></span>"})
 
 
 
@@ -264,21 +419,29 @@ $('.love-album').click(function(e){
 
 // })
 
+
+
+
+
 $(document).on('click', ".love-track", function(e) {
 // $('.like-track').click(function(e){
     var button = $(e.target)
-    $track = $(button).closest("[data-track-id]")
+    // $track = $(button).closest("[data-track-id]")
+    $track = $(button).closest(".track")
     console.log("love track button clicked");
     // var $target = $(e.target).parent();
     // var $target_parent = $($target).parent();
     // console.log($target);
     // console.log($target_parent);
     var track_id = $($track).data('track-id');
+    var artist = $($track).data('artist');
+    var artist_id = $($track).data('artist-id');
+    var title = $($track).data('title');
     // console.log(label_id)
     //var artist_name = $($target_parent).data('artist');
     // console.log('artist id: ' +artist_id);
     // console.log('artist name: '+artist_name);
-    data = {'type':'track', 'track_id':track_id,};
+    data = {'type':'track', 'track_id':track_id, 'artist':artist, 'artist_id':artist_id, 'title':title};
     $.ajax({
         type: "POST",
         url: "/follow_toggle/",
@@ -439,6 +602,10 @@ function create_album_track(artist, title, track_id, following, artist_id){
     var $title_span = $("<span>", {text:" - "+title})
     $($li).append($title_span);
 
+    var $playlist_a = $("<a>", {class:"pull-right", title:"Add to Playlist"})
+    var $playlist_span = $("<span>", {class:"glyphicon glyphicon-plus playlist-add add-track"})
+    $($playlist_a).append($playlist_span);
+    $($li).append($playlist_a);
 
     var $love_a = $("<a>", {class:"pull-right", title:"Love Track"})
     var $love_span = $("<span>", {class:"glyphicon glyphicon-heart love-track"})
@@ -448,11 +615,7 @@ function create_album_track(artist, title, track_id, following, artist_id){
     $($love_a).append($love_span);
     $($li).append($love_a);
 
-    var $playlist_a = $("<a>", {class:"pull-right", title:"Add to Playlist"})
-    var $playlist_span = $("<span>", {class:"glyphicon glyphicon-plus playlist-add"})
-    $($playlist_a).append($playlist_span);
-    $($li).append($playlist_a);
-
+    
     return $li;
 }
 

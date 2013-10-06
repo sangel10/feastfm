@@ -26,7 +26,15 @@ urlpatterns = patterns('',
     url(r'^my_follows/$', 'scrapers.views.my_follows'),
     url(r'^my_sounds/$', 'scrapers.views.my_sounds'),
     url(r'^all_sounds/$', 'scrapers.views.all_sounds'),
+    url(r'^create_playlist/$', 'scrapers.views.create_playlist'),
+    url(r'^get_playlists/$', 'scrapers.views.get_playlists'),
+    url(r'^album_to_playlist/$', 'scrapers.views.add_album_to_playlist'),
+    url(r'^track_to_playlist/$', 'scrapers.views.add_track_to_playlist'),
+    url(r'^playlist/(?P<playlist_id>[^/]+)/$', 'scrapers.views.playlist_view'),
     url(r'^source/(?P<source_id>[^/]+)/$', 'scrapers.views.songs_by_source'),
+
+
+
     #url(r'^login/$', 'django.contrib.auth.views.login'),
     #url(r'^accounts/', include('registration.urls')),
     url(r'^accounts/register/$',

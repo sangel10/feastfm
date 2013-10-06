@@ -173,17 +173,18 @@ class Album(models.Model):
 
 class UserProfile(models.Model):
     # This field is required.
-    user = models.OneToOneField(User)
-    artists = models.ManyToManyField(Artist, related_name = "users", blank=True, null = True)
-    labels = models.ManyToManyField(Label, related_name = "users", blank=True, null = True)
-    sources = models.ManyToManyField(Source, related_name = "users", blank=True, null = True)
-    mix_series = models.ManyToManyField(Mix_Series, related_name = "users", blank=True, null = True)
-    sounds = models.ManyToManyField(Sound, related_name = "users", blank=True, null = True)
-    albums = models.ManyToManyField(Album, related_name = "users", blank=True, null = True)
+	user = models.OneToOneField(User)
+	artists = models.ManyToManyField(Artist, related_name = "users", blank=True, null = True)
+	labels = models.ManyToManyField(Label, related_name = "users", blank=True, null = True)
+	sources = models.ManyToManyField(Source, related_name = "users", blank=True, null = True)
+	mix_series = models.ManyToManyField(Mix_Series, related_name = "users", blank=True, null = True)
+	sounds = models.ManyToManyField(Sound, related_name = "users", blank=True, null = True)
+	albums = models.ManyToManyField(Album, related_name = "users", blank=True, null = True)
 
+	def __unicode__(self):
+		return u'%s' % (self.user.username)
+		# return self.user.username
 
-    def __unicode__(self):
-		return self.user
 
 def create_user_profile(sender, instance, created, **kwargs):
 	if created:
@@ -212,24 +213,28 @@ class Embed(models.Model):
 
 
 
-
-class User_playlist_entry(models.Model):
-	sounds = models.ManyToManyField(Sound, related_name = "user_playlist_entries", blank=True, null = True)
-	embeds = models.ManyToManyField(Embed, related_name = "user_playlist_entries", blank=True, null = True)
-	albums = models.ManyToManyField(Album, related_name = "user_playlist_entries", blank=True, null = True)
-	position = models.IntegerField(blank=True, null = True)
-
-	
-
-
 class User_playlist(models.Model):
 	name = models.CharField(max_length = 500, blank = True)
 	users = models.ManyToManyField(UserProfile, related_name='user_playlists', blank=True, null=True)
-	entries =models.ManyToManyField(User_playlist_entry, related_name='user_playlists', blank=True, null=True)
+	# entries =models.ManyToManyField(User_playlist_entry, related_name='user_playlists', blank=True, null=True)
 	date_created = models.DateTimeField(default=datetime.now, blank=True)
-	
+	description = models.TextField(blank=True)
+
 	def __unicode__(self):
 		return self.name
+
+class User_playlist_entry(models.Model):
+	user_playlist = models.ForeignKey(User_playlist, related_name = "entries", blank = True, null =True)
+	sound = models.ForeignKey(Sound, related_name = "user_playlist_entries", blank=True, null = True)
+	embed = models.ForeignKey(Embed, related_name = "user_playlist_entries", blank=True, null = True)
+	album = models.ForeignKey(Album, related_name = "user_playlist_entries", blank=True, null = True)
+	position = models.IntegerField(blank=True, null = True)
+	date_added = models.DateTimeField(default=datetime.now, blank=True)
+
+	
+
+
+
 
 
 # class ArtistName(models.Model):

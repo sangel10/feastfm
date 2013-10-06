@@ -1,7 +1,3 @@
-# Create your views here.
-# Create your views here.
-
-
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
 import urllib2
@@ -15,7 +11,10 @@ import simplejson
 
 from django.contrib.auth.decorators import login_required
 from scrapers.models import *
+
 import musicbrainzngs as mbz
+from scrapers.mbz_module import *
+from scrapers.db_handler import *
 
 mbz.set_useragent("feast", "0.0.0", "santiagoangel10@gmail.com")
 
@@ -31,7 +30,7 @@ def home(request):
 		artists = get_lastfm_artists(username, 100)
 		artist_names = []
 		for artist in artists:
-			artist_names.append(artist['name'])
+			artist_names.append(artist['name'])	
 		query = get_stream_query('artist', artist_names)
 
 		releases, rgids = get_browse_releases('stream', query)
@@ -98,27 +97,13 @@ def get_stream_query(query_type, mbids):
 	query = urllib.quote_plus(query.encode('utf8'))
 	return query 
 
-
-#@login_required(login_url='/accounts/login/')
 def get_album_tracks(request):
 	# if request.user.is_authenticated():
 	print "album_tracks was just called"
 	get = request.GET.copy()
 	print get
 	reid = get[u"reid"]
-	url = "http://www.musicbrainz.org/ws/2/release/"+reid+"?fmt=json&inc=artist-credits+recordings"
-	print "This is the get album tracks URL " + url
-	data = urllib2.urlopen(url)
-	api_results = json.load(data)
-	tracks = []
-	for entry in api_results['media']:
-		for track in entry['tracks']:
-			artist = track['artist-credit'][0]['name']
-			artist_id = track['artist-credit'][0]['artist']['id']
-			title = track['recording']['title']
-			track_id = track['recording']['id']
-			tracks.append({'artist':artist, 'title':title, 'track_id':track_id, 'artist_id':artist_id})
-	# results = {'reid':reid, 'tracks':tracks}
+	tracks = getTracklistByReid(reid)
 	tracks = check_if_follows(request,'sounds', tracks)
 	print "this is tracks on get album tracks"
 	print tracks
@@ -134,7 +119,7 @@ def get_album_tracks_lastfm(request):
 	print "album_tracks lastfm was just called"
 	get = request.GET.copy()
 	print get
-	reid = get["reid"]
+	# reid = get["reid"]
 	artist = get["artist"]
 	artist = urllib.quote_plus(artist)
 	title = get["title"]
@@ -183,82 +168,6 @@ def label(request, label_id):
 	print releases
 	return render_to_response('scrapers/home.html',{'page':'label', 'releases':releases}, context_instance=RequestContext(request))
 
-
-
-def get_browse_releases(query_type, mbid_or_query, rgids = None):
-	offset = 0
-	releases = []
-	if rgids == None:
-		rgids = []
-	# while True:
-	while offset <= 1000:
-		if query_type == 'label':
-			url = "http://www.musicbrainz.org/ws/2/release?label="+mbid_or_query+"&fmt=json&limit=100&offset="+str(offset)+"&inc=artist-credits+release-groups+labels"
-		if query_type == 'artist':
-			url = "http://www.musicbrainz.org/ws/2/release?artist="+mbid_or_query+"&fmt=json&limit=100&offset="+str(offset)+"&inc=artist-credits+release-groups+labels"
-		if query_type == 'stream':
-			url = "http://www.musicbrainz.org/ws/2/release?&query="+mbid_or_query+ "&limit=100&fmt=json&offset="+str(offset)
-		print "THIS IS THE QUERY URL for get_browse_releases: \n" + url
-		data = urllib2.urlopen(url)
-		api_results = json.load(data)
-		if api_results["releases"] == []:
-			break
-		parsed_results = parse_releases(api_results, rgids)
-		releases += parsed_results['releases']
-		rgids += parsed_results['rgids']
-		offset +=100
-	#return render_to_response('scrapers/home.html',{'page':query_type, 'releases':releases})
-	# releases = check_if_follows('artists', releases)
-	# releases = check_if_follows('labels', releases)
-	return releases, rgids
-
-
-def parse_releases(api_results, rgids):
-	releases = []
-	for release in api_results['releases']:
-		rgid = release['release-group']['id']
-		if rgid in rgids:
-			continue
-		try: 
-			date = release['date']
-		except:
-			date = ""
-		title = release['title']
-		artist = release['artist-credit'][0]['artist']['name']
-		artist_id = release['artist-credit'][0]['artist']['id']
-		reid = release['id']
-		# cat_num = release['label-info'][0]['catalog-number']
-		try:
-			primary_type = release['release-group']['primary-type']
-		except:
-			primary_type = ""
-		try:
-			secondary_types = release['release-group']['secondary-types']
-		except:
-			secondary_types = ""
-		try:
-			label = release['label-info'][0]['label']['name']
-			label_id = release['label-info'][0]['label']['id']
-			cat_num = release['label-info'][0]['catalog-number']
-		except:
-			label = ""
-			label_id = ""
-			cat_num = ""
-		rgids.append(rgid)
-		releases.append({
-			'date':date,
-			'title':title,
-			'artist':artist,
-			'artist_id':artist_id,
-			'rgid':rgid,
-			'reid':reid,
-			'cat_num':cat_num,
-			'primary_type':primary_type,
-			'secondary_types':secondary_types,
-			'label':label,
-			'label_id':label_id,
-			})
-	return {'releases':releases, 'rgids':rgids}
 
 
 
@@ -370,360 +279,8 @@ def search(request):
 		#return HttpResponse("No username")
 		return render_to_response('scrapers/home.html', {'page':'search'}, context_instance=RequestContext(request))
 
-def mbz_search(query, query_type, limit =100):
-	url = "http://musicbrainz.org/ws/2/"+query_type+"/?query="+query+"&fmt=json&limit="+str(limit)
-	print "QUERY URL: " + url
-	data = urllib2.urlopen(url)
-	api_results = json.load(data)
-	#print api_results
-	return api_results
 
 
-
-
-# def get_artist_by_mbid(artist_id, artist_name):
-# 	artist, artist_created = Artist.objects.get_or_create(mbid = artist_id)
-# 	print artist 
-# 	if artist_created:
-# 		# artist.name = get_english_alias('artist', artist_id)
-# 		artist.name = artist_name
-# 		artist.save()
-# 		print "added artist"
-# 	return artist
-
-# def get_label_by_mbid(label_id, label_name):
-# 	label, label_created = Label.objects.get_or_create(mbid = label_id)
-# 	print label 
-# 	if label_created:
-# 		# label.name = get_english_alias('label', label_id)
-# 		label.name = label_name
-# 		label.save()
-# 		print "added label"
-# 	return label
-
-# def get_album_by_reid(artist_id, artist_name, title, reid):
-
-# 	album, album_created = Album.objects.get_or_create(mbid = reid)
-# 	print album
-	
-	
-# 	if album_created:
-# 		artist = get_artist_by_mbid(artist_id, artist_name)
-# 		album.title = title
-# 		album.artists.add(artist)
-# 		# album.name = get_english_alias('label', label_id)
-# 		album.save()
-# 		print "added album"
-# 	return album
-
-# def get_sound_by_mbid(sound_id, artist_id, artist_name, title):
-# 	sound, sound_created = Sound.objects.get_or_create(mbid = sound_id)
-# 	print sound
-
-# 	if sound_created:
-# 		artist = get_artist_by_mbid(artist_id, artist_name)
-# 		sound.title = title
-# 		sound.artists.add(artist)
-# 		sound.save()
-# 		print "sound added"
-# 	return sound
-
-
-
-# def get_sound_without_mbid(artist_name, title):
-# 	sound, sound_created = Sound.objects.get_or_create(title = title, artist_name = artist_name)
-# 	return sound
-
-# def get_album_without_mbid(artist_name, title):
-# 	album, album_created = Album.objects.get_or_create(title =title, artist_name = artist_name)
-# 	return album 
-
-
-
-
-
-def follow_toggle(request):
-	if request.user.is_authenticated():
-		user = request.user
-		user_profile, up_created = UserProfile.objects.get_or_create(user = user)
-
-		post = request.POST.copy()
-
-		if post['type'] == 'artist':
-			print "type: artist "
-			artist_name = post['artist_name']
-			# print artist_name 
-			artist_id = post['artist_id']
-			# artist, artist_created = Artist.objects.get_or_create(name = artist_name)
-			artist = get_artist_by_mbid(artist_id, artist_name)
-
-			if artist in user_profile.artists.all():
-			# if user_profile.artists.filter(name = artist_name).exists():
-				user_profile.artists.remove(artist)
-				user_profile.save()
-				print "unfollowed artist"
-
-			else:
-				user_profile.artists.add(artist)
-				user_profile.save()
-				print "followed artist"
-
-
-		elif post['type'] == 'label':
-			print "type: label "
-			label_id = post['label_id']
-			lable_name = post['label_name']
-			print label_id
-
-			label = get_label_by_mbid(label_id, label_name)
-
-			if label in user_profile.labels.all():
-			# if user_profile.labels.filter(mbid = label_id).exists():
-				user_profile.labels.remove(label)
-				user_profile.save()
-				print "unfollowed label"
-
-			else:
-				user_profile.labels.add(label)
-				user_profile.save()
-				print "followed label"
-
-		# try:
-		elif post['type'] == 'track':
-			pass
-			print "type: track "
-			track_id = post['track_id']
-			print track_id
-			sound, sound_created = Sound.objects.get_or_create(mbid = track_id)
-			print sound 
-			if sound_created:
-				url = "http://www.musicbrainz.org/ws/2/recording/"+track_id+"?fmt=json&inc=artist-credits"
-				data = urllib2.urlopen(url)
-				api_results = json.load(data)
-				sound.title = api_results['title']
-				sound.save()
-				print "added sound"
-
-				for artist in api_results['artist-credit']:
-					artist_id = artist['artist']['id']
-					artist = get_artist_by_mbid(artist_id)
-					sound.artists.add(artist)
-					sound.save()
-
-			if user_profile.sounds.filter(mbid = track_id).exists():
-				user_profile.sounds.remove(sound)
-				user_profile.save()
-				print "unfollowed sound"
-
-			else:
-				user_profile.sounds.add(sound)
-				user_profile.save()
-				print "followed sound"
-
-		# if post['type'] == 'release':
-		# 	print "type: release "
-		# 	try:
-		# 		reid = post['reid']
-		# 	except:
-		# 		reid = ""
-
-		# 	artist = post['artist']
-		# 	title = post['title']
-
-		# 	artist, artist_created = Artist.objects.get_or_create(name = artist)
-
-		# 	if not artist_created:
-		# 		albums = artist.albums.all()
-		# 		albums = albums.get(title = title)
-		# 		if albums:
-		# 			album = albums[0]
-		# 		else:
-		# 			album = Album.objects.create(title = title)
-		# 			album.artists.add(artist)
-		# 			album.save()
-
-		# 		user_profile.add(album)
-		# 		user_profile.save()
-
-		# 	else:
-		# 		album = Album.create(title = title)
-		# 		album.artists.add(artist)
-		# 		album.save()
-		# 		user_profile.add(album)
-		# 		user_profile.save()
-
-		# 	album = Album.objects.get_or_create(title = title)
-		# 	if album[1]:
-
-		# 	# album = Album.create(title = title)
-		# 		album.artists.add(artist)
-		# 		if reid:
-		# 			album.album_type = "release"
-		# 			album.mbid = reid
-		# 		else:
-		# 			album.album_type = "scraped"
-
-		# 		album.save()
-
-
-
-		#release
-		# if post['type'] == 'release':
-		# 	print "type: release "
-		# 	reid = post['reid']
-		# 	print reid
-		# 	release, release_created = Release.objects.get_or_create(release_id = reid)
-		# 	print release 
-		# 	if release_created:
-		# 		url = "http://www.musicbrainz.org/ws/2/release/"+reid+"?fmt=json&inc=labels+release-groups+recordings+artist-credits"
-		# 		print "This is the release url " + url
-		# 		data = urllib2.urlopen(url)
-		# 		api_results = json.load(data)
-		# 		release.title = api_results['title']
-		# 		release.save()
-		# 		print "added release"
-
-		# 		release.date_released_string = api_results['date']
-		# 		release.primary_type = api_results['release-group']['primary_type']
-		# 		release.secondary_types = "".join(api_results['release-group']['secondary_types'])
-
-		# 		for label in api_results['label-info']:
-		# 			try:
-		# 				label_id = label['id']
-		# 				label_name = label['name']
-		# 				label, label_created = Label.objects.get_or_create(mbid = label_id)
-		# 				label.save()
-		# 				if label_created:
-		# 					label.name = label_name
-		# 					label.save()
-		# 				release.labels.add(label)
-		# 				release.save()
-		# 			except:
-		# 				print "no label info"
-		# 			try:
-		# 				release.catalog_number = label["catalog-number"]
-		# 				release.save()
-		# 			except:
-		# 				print "no catalog number"
-
-
-		# 		for artist in api_results['artist-credit']:
-		# 			artist_id = artist['artist']['id']
-		# 			artist = get_artist_by_mbid(artist_id)
-		# 			release.artists.add(artist)
-		# 			release.save()
-
-		# 	if user_profile.releases.filter(release_id = reid).exists():
-		# 		user_profile.releases.remove(releases)
-		# 		user_profile.save()
-		# 		print "unfollowed release"
-
-		# 	else:
-		# 		user_profile.releases.add(release)
-		# 		user_profile.save()
-		# 		print "followed release"
-
-
-		return HttpResponse("you're logged in!! " + request.user.username)
-	else:
-		return HttpResponse('You must be logged in to do this', status=401)
-
-
-def follow_album(request):
-	if request.user.is_authenticated():
-		user = request.user
-		user_profile, up_created = UserProfile.objects.get_or_create(user = user)
-
-		post = request.POST.copy()
-		post_type = post['type']
-		print post_type
-		if post_type == 'album':
-			print "type: album "
-			# artist_name = post['artist_name']
-			# print artist_name 
-			artist_name = post['artist']
-			title = post['title']
-			reid = post['reid']
-
-			album = get_or_create_album_by_artist_and_title(artist_name, title, reid)
-			# artist = get_artist_by_mbid(artist_id)
-
-
-			if album in user_profile.albums.all():
-				user_profile.albums.remove(album)
-				user_profile.save()
-				print "unfollowed album"
-
-			else:
-				user_profile.albums.add(album)
-				user_profile.save()
-				print "followed album"
-
-		return HttpResponse("you're logged in!! " + request.user.username)
-	else:
-		return HttpResponse('You must be logged in to do this', status=401)
-
-
-# def get_or_create_album_by_artist_and_title(artist, title):
-# 	url = "http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=c43db4e93f7608bb10d96fa5f69a74a1&artist="+artist+"&album="+title+"&autocorrect=1&format=json"
-# 	data = urllib2.urlopen(url)
-# 	results = json.load(data)
-# 	try:
-# 		mbid = results['album']['mbid']
-# 	except:
-# 		mbid = ""
-# 	artist = results['album']['artist']
-# 	title = results['album']['name']
-
-# 	artist, artist_created = Artist.objects.get_or_create(name = artist)
-
-# 	album, album_created = Album.objects.get_or_create(mbid = mbid)
-
-# 	if album_created:
-# 		album.title = title
-# 		album.album_type = "reid"
-# 		album.artists.add(artist)
-# 		album.save()
-
-# 	return album 
-
-
-
-def get_or_create_album_by_artist_and_title(artist, title, reid=""):
-	artist, artist_created = Artist.objects.get_or_create(name = artist)
-	artist_albums = artist.albums.all()
-	filtered_albums = artist_albums.filter(title = title)
-	if not filtered_albums:
-		album = Album.objects.create(title = title)
-		album.artists.add(artist)
-		album.save()
-	else:
-		album = filtered_albums[0]
-	return album 
-
-
-
-
-
-# def get_or_create_album_by_reid(reid):
-# 	album, album_created = Album.objects.get_or_create(mbid = reid)
-# 	if album_created:
-
-# 		album = 
-
-	
-def get_english_alias(lookup_type, mbid):
-	url = "http://musicbrainz.org/ws/2/"+lookup_type+"/"+mbid+"?inc=aliases&fmt=json"
-	data = urllib2.urlopen(url)
-	results = json.load(data)
-	name = ""
-	for alias in results['aliases']:
-		if alias['locale'] == "en":
-			name = alias['name']
-			break
-	if not name:
-		name = results['name']
-	return name
 
 def stream(request):
 	if request.user.is_authenticated():
@@ -1162,4 +719,156 @@ def full_search(request):
 
 def import_artists(request):
 	return render_to_response('scrapers/home.html',{'page':'advanced_search'},context_instance=RequestContext(request))
+
+
+def playlist_view(request, playlist_id):
+	playlist = User_playlist.objects.get(pk =playlist_id)
+
+
+	tracks = []
+	albums = []
+	for pl_entry in playlist.entries.all():
+
+		if pl_entry.sound:
+			entry = pl_entry.sound
+			track = {'title':entry.title, 'type': 'text'}
+			if entry.mbid:
+				track_id = entry.mbid
+				artist_name = entry.artists.all()[0].name
+				artist_id = entry.artists.all()[0].mbid 
+				track.update({'track_id':track_id, 'artist':artist_name, 'artist_id':artist_id})
+				print "this is the playlistview processed track" 
+				print track
+			elif entry.artist_name:
+				artist_name = entry.artist_name
+				track.update({"artist":artist_name})
+			tracks.append(track)
+
+		if pl_entry.album:
+			entry = pl_entry.album
+			album = {'title': entry.title}
+			if entry.reid:
+				release_id = entry.reid
+				artist_name = entry.artists.all()[0].name
+				artist_id = entry.artists.all()[0].mbid
+				album['reid'] = release_id
+				album['artist'] = artist_name
+				album['artist_id'] = artist_id
+
+			elif track['artist_name']:
+				artist_name = entry.artist_name
+				album['artist_name'] = artist_name
+			albums.append(album)
+
+	if albums or tracks:
+		return render_to_response('scrapers/home.html',{'page':'search', 'releases':albums, 'sounds':tracks},context_instance=RequestContext(request))
+	else:
+		return HttpResponse("This is an empty playlist, add search to add albums and songs! Playlist #"+str(playlist_id))
+
+
+from django.shortcuts import render
+from django.http import HttpResponseRedirect
+
+def create_playlist(request):
+	if request.user.is_authenticated():
+		if request.method == 'POST': # If the form has been submitted...
+			form = PlaylistForm(request.POST) # A form bound to the POST data
+			if form.is_valid():
+				playlist = form.save()
+				pk = playlist.pk
+				user = request.user
+				print user
+				user_profile, up_created = UserProfile.objects.get_or_create(user = user)
+				print "user profile created: " + str(up_created)
+				print user_profile.user.username
+				playlist.users.add(user_profile)
+				playlist.save()
+
+		     # All validation rules pass
+		        # Process the data in form.cleaned_data
+		        # ...
+		        return HttpResponseRedirect('/playlist/'+str(pk)) # Redirect after POST
+		else:
+			form = PlaylistForm() # An unbound form
+
+		return render_to_response('scrapers/home.html', {'page':"create_playlist", 'form': form}, context_instance=RequestContext(request))
+	else:
+		return HttpResponse("You need to be logged in to make playlists")
+
+from django.forms import ModelForm
+class PlaylistForm(ModelForm):
+    class Meta:
+        model = User_playlist
+        fields = ('name', 'description')
+
+
+def get_playlists(request):
+	if request.user.is_authenticated():
+		user = request.user
+		user_profile, up_created = UserProfile.objects.get_or_create(user = user)
+		playlist_set = user_profile.user_playlists.all()
+		playlists = []
+		for entry in playlist_set:
+			playlist = {"name":entry.name, "pk":entry.pk}
+			playlists.append(playlist)
+		results = {'playlists':playlists}
+		return_json = simplejson.dumps(results)
+		return HttpResponse(return_json, mimetype='application/json')
+	else:
+		return HttpResponse("You need to be logged in to make playlists", status=401)
+	
+
+
+
+def add_album_to_playlist(request):
+	if request.user.is_authenticated():
+		user = request.user
+		user_profile, up_created = UserProfile.objects.get_or_create(user = user)
+		if request.method == 'POST':
+			post = request.POST.copy()
+			title = post['title']
+			reid = post['reid']
+			artist_name = post['artist_name']
+			release = get_or_create_release(title = title, artist_name = artist_name, reid = reid)
+			playlist_id = post['playlist_id']
+			playlist = User_playlist.objects.get(pk =playlist_id)
+
+			playlist_entry = User_playlist_entry(album = release, user_playlist = playlist)
+			playlist_entry.save()
+
+		return HttpResponse('success')
+	else:
+		return HttpResponse("You need to be logged in to make playlists",  status=401)
+
+def add_track_to_playlist(request):
+	if request.user.is_authenticated():
+		user = request.user
+		user_profile, up_created = UserProfile.objects.get_or_create(user = user)
+		if request.method == 'POST':
+			post = request.POST.copy()
+			title = post['title']
+			mbid = post['mbid']
+			artist_name = post['artist_name']
+			sound = get_or_create_recording(title = title, artist_name = artist_name, mbid = mbid)
+			playlist_id = post['playlist_id']
+			playlist = User_playlist.objects.get(pk =playlist_id)
+
+			playlist_entry = User_playlist_entry(sound = sound, user_playlist = playlist)
+			playlist_entry.save()
+
+		return HttpResponse('success')
+	else:
+		return HttpResponse("You need to be logged in to make playlists",  status=401)
+
+
+
+
+
+
+
+
+
+
+
+
 
