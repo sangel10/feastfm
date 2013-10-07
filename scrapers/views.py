@@ -805,18 +805,31 @@ class PlaylistForm(ModelForm):
 def get_playlists(request):
 	if request.user.is_authenticated():
 		user = request.user
-		user_profile, up_created = UserProfile.objects.get_or_create(user = user)
-		playlist_set = user_profile.user_playlists.all()
-		playlists = []
-		for entry in playlist_set:
-			playlist = {"name":entry.name, "pk":entry.pk}
-			playlists.append(playlist)
+		# user_profile, up_created = UserProfile.objects.get_or_create(user = user)
+		# playlist_set = user_profile.user_playlists.all()
+		# playlists = []
+		# for entry in playlist_set:
+		# 	playlist = {"name":entry.name, "pk":entry.pk,'description':entry.description}
+		# 	playlists.append(playlist)
+		playlists = get_user_playlists(user)		
 		results = {'playlists':playlists}
+
 		return_json = simplejson.dumps(results)
 		return HttpResponse(return_json, mimetype='application/json')
 	else:
 		return HttpResponse("You need to be logged in to make playlists", status=401)
-	
+
+
+def get_user_playlists(user):
+	user_profile, up_created = UserProfile.objects.get_or_create(user = user)
+	playlist_set = user_profile.user_playlists.all()
+	playlists = []
+	for entry in playlist_set:
+		playlist = {"name":entry.name, "pk":entry.pk,'description':entry.description}
+		playlists.append(playlist)
+	return playlists
+
+
 
 
 
@@ -861,7 +874,14 @@ def add_track_to_playlist(request):
 		return HttpResponse("You need to be logged in to make playlists",  status=401)
 
 
+def my_playlists(request):
+	if request.user.is_authenticated():
+		user = request.user
+		playlists = get_user_playlists(user)	
 
+		return render_to_response('scrapers/home.html', {'page':"my_playlist", 'playlists':playlists}, context_instance=RequestContext(request))
+	else:
+		return HttpResponse("You need to be logged in to have playlists")
 
 
 
