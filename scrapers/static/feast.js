@@ -233,19 +233,43 @@ $('.love-album').click(function(e){
 // for albums
 $(".add-album").click(function(e){
     addPopover(e, 'album-to-playlist')
+    e.stopPropagation();
 })
 
 $(document).on('click', ".add-track", function(e) {
 // $(".add-track").on('click',function(e){
     console.log("add-track clicked  ")
     addPopover(e, 'track-to-playlist')
+    e.stopPropagation();
 })
 
+
+
+
+
+//close popovers on outside click
+$(document).on("click", function (e) {
+    console.log("clicked document")
+    var $target = $(e.target),
+        isPopover = $(e.target).is('.popover'),
+        inPopover = $(e.target).closest('.popover').length > 0
+        var $popover = $('.popover');
+        console.log("")
+
+    //hide only if clicked on button or inside popover
+    if (!isPopover && !inPopover) {
+        // $popover.popover('hide');
+        // $popover.remove()
+        $(".add-album, .add-track").popover('destroy')
+    }   
+});
+
+
 function addPopover(e, add_class){
+
     var $target = $(e.target)
-    // data = {'type':'album', 'reid':reid, 'artist':artist, 'title':title};
-    // var popover = $($target).next(".popover")
-    // console.log($($target).next(".popover"))
+    $(".add-album, .add-track").not($target).popover('destroy')
+
 
     if ($($target).next(".popover").length>0){
         // $(".add-album").next(".popover").toggle()
@@ -286,6 +310,8 @@ function addPopover(e, add_class){
                 $div2.append($a)
                 $div2.append($add_button)
                 $div.append($div2)
+                var $h5 = $("<h5>")
+                $h5.append($div)
             }
 
             // $('body').popover({
@@ -296,7 +322,7 @@ function addPopover(e, add_class){
             $target.popover(
                 {placement:'bottom', 
                 html:true, 
-                content: $div,
+                content: $h5,
                 trigger: 'focus',
                 toggle: 'popover',
                 selector: '[rel="popover"]',
@@ -421,7 +447,73 @@ $(document).on('click', ".album-to-playlist", function(e){
 
 
 
+$(document).on('click', ".delete-playlist", function(e){
+    var $target = $(e.target)
+    var $playlist = $target.closest(".playlist")
+    var playlist_id = $target.data("playlist-id")
+    console.log(playlist_id, $playlist)
+    var result = window.confirm("Are you sure you want to delete this playlist? You won't be able to get it back if you do.")
+    if(result){
+        // $playlist.remove()
+        data = {'playlist_id':playlist_id};
+        $.ajax({
+            type: "POST",
+            url: "/remove_playlist/",
+            data: data,
+            success: function(){
+                //alert("it worked");
+                $playlist.remove()
+            },
+        })
+    }
+    
+})
 
+$(document).on('click', ".delete-track", function(e) {
+    console.log("delete-track clicked")
+     var $target = $(e.target)
+     var $track = $target.closest(".track")
+     console.log("track: ",$track)
+     var entry_id = $target.data('entry-id')
+     console.log(entry_id)
+     var result = window.confirm("Are you sure you want to delete this from your playlist?")
+     if (result){
+        delete_entry(entry_id, $track)
+     }
+     
+})
+
+$(document).on('click', ".delete-album", function(e) {
+    console.log("delete-album clicked")
+     var $target = $(e.target)
+     var $album = $target.closest(".album")
+     console.log("album: ",$album)
+     var entry_id = $target.data('entry-id')
+     console.log(entry_id)
+     var result = window.confirm("Are you sure you want to delete this from your playlist?")
+     if (result){
+        delete_entry(entry_id, $album)
+     }
+     
+})
+
+
+
+
+
+function delete_entry(entry_id, $element_to_remove){
+    console.log("will remove this element", $element_to_remove)
+    data = {'entry_id':entry_id};
+    $.ajax({
+        type: "POST",
+        url: "/delete_entry/",
+        data: data,
+        success: function(){
+            //alert("it worked");
+            $element_to_remove.remove()
+        },
+    })
+}
 
 $(document).on('click', ".love-track", function(e) {
 // $('.like-track').click(function(e){
@@ -1053,7 +1145,7 @@ renderTrack = function(artist, title){
                 
                 else if(seekbar == true && currentTime){
                     $(".noUiSlider").val(currentTime);
-                    console.log("currentTime exists and should be setting the slider to : ", currentTime)
+                    // console.log("currentTime exists and should be setting the slider to : ", currentTime)
                 }
 
 

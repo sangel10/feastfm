@@ -17,6 +17,7 @@ urlpatterns = patterns('',
    
     # url(r'^search/$', 'scrapers.views.search'),
     url(r'^search/$', 'scrapers.views.full_search'),
+    url(r'^artist_search/$', 'scrapers.views.artist_search_view'),
     url(r'^advanced_search/$', 'scrapers.views.import_artists'),
     url(r'^lastfm_search/$', 'scrapers.views.lastfm_search'),
     url(r'^follow_toggle/$', 'scrapers.views.follow_toggle'),
@@ -29,10 +30,12 @@ urlpatterns = patterns('',
     url(r'^create_playlist/$', 'scrapers.views.create_playlist'),
     url(r'^get_playlists/$', 'scrapers.views.get_playlists'),
     url(r'^my_playlists/$', 'scrapers.views.my_playlists'),
+    url(r'^remove_playlist/$', 'scrapers.views.remove_user_playlist'),
     url(r'^album_to_playlist/$', 'scrapers.views.add_album_to_playlist'),
     url(r'^track_to_playlist/$', 'scrapers.views.add_track_to_playlist'),
     url(r'^playlist/(?P<playlist_id>[^/]+)/$', 'scrapers.views.playlist_view'),
     url(r'^source/(?P<source_id>[^/]+)/$', 'scrapers.views.songs_by_source'),
+    url(r'^delete_entry/$', 'scrapers.views.delete_playlist_entry'),
 
 
 

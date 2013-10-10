@@ -374,7 +374,11 @@ def check_if_follows(request, model_type, list_of_entities):
 		 	for entry in model_entries:
 		 		mbids.append(entry.mbid)
 		 	for item in list_of_entities:
-		 		if item['track_id'] in mbids:
+		 		if 'track_id' in item and item['track_id'] in mbids:
+		 			# item['following_sound'] = "You Like This"
+		 			item['following_sound'] = True
+		 			print "following sound"
+		 		elif 'mbid' in item and item['mbid'] in mbids:
 		 			# item['following_sound'] = "You Like This"
 		 			item['following_sound'] = True
 		 			print "following sound"
@@ -415,11 +419,7 @@ def my_follows(request):
 			artists.append({'name':artist.name, 'artist_id':artist.mbid})
 		artists = check_if_follows(request, 'artists', artists)
 
-		album_set = request.user.get_profile().albums.all()
-		albums = []
-		for album in album_set:
-			albums.append({'title': album.title, 'artist':album.artists.all()[0].name})
-		albums = check_if_follows(request, 'albums', albums)
+		
 
 
 		label_set = request.user.get_profile().labels.all()
@@ -428,7 +428,7 @@ def my_follows(request):
 			labels.append({'name':label.name, 'label_id':label.mbid})
 		labels = check_if_follows(request, 'labels', labels)
 
-		return render_to_response('scrapers/home.html',{'page':'my_follows', 'artists':artists, 'labels':labels, 'releases':albums}, context_instance=RequestContext(request))
+		return render_to_response('scrapers/home.html',{'page':'my_follows', 'artists':artists, 'labels':labels, }, context_instance=RequestContext(request))
 
 	else:
 		return HttpResponse("You need to be logged in to see followed artists and labels")
@@ -438,8 +438,35 @@ def my_sounds(request):
 		sound_set = request.user.get_profile().sounds.all()
 		sounds = []
 		for sound in sound_set:
-			sounds.append({'artist':sound.artists.all()[0], 'title':sound.title, 'mbid':sound.mbid})
+			if sound.artists.all():
+				artist = sound.artists.all()[0].name
+				artist_id = sound.artists.all()[0].mbid
+			elif sound.artist_name:
+				artist = sound.artist_name
+				artist_id = ""
+			else:
+				artist = ""
+				artist_id = ""
+			sounds.append({'artist':artist, 'artist_id':artist_id, 'title':sound.title, 'mbid':sound.mbid})
 			sounds = check_if_follows(request, 'sounds', sounds)
+
+
+		album_set = request.user.get_profile().albums.all()
+		albums = []
+		for album in album_set:
+			if album.artists.all():
+				artist = album.artists.all()[0].name
+				artist_id = album.artists.all()[0].mbid
+			elif album.artist_name:
+				artist = album.artist_name
+				artist_id = ""
+			else:
+				artist = ""
+				artist_id = ""
+			albums.append({'title': album.title, 'artist':artist, 'artist_id':artist_id})
+		albums = check_if_follows(request, 'albums', albums)
+		print "these are the my_follows albums: "
+		print albums
 		# artists = check_if_follows(request, 'artists', artists)
 
 		# label_set = request.user.get_profile().labels.all()
@@ -448,7 +475,7 @@ def my_sounds(request):
 		# 	labels.append({'name':label.name, 'label_id':label.mbid})
 		# labels = check_if_follows(request, 'labels', labels)
 
-		return render_to_response('scrapers/home.html',{'page':'my_sounds', 'sounds':sounds}, context_instance=RequestContext(request))
+		return render_to_response('scrapers/home.html',{'page':'my_sounds', 'sounds':sounds, 'releases':albums}, context_instance=RequestContext(request))
 
 	else:
 		return HttpResponse("You need to be logged in to see followed artists and labels")
@@ -628,35 +655,44 @@ def full_search(request):
 					#print "api_results length: " + str(len(api_results))
 					# print "ENTRY: "
 					# print entry 
-					labels.append({'name':entry['name'], 'label_id':entry['id']})
+					if 'disambiguation' in entry:
+						disambiguation = entry['disambiguation']
+					else:
+						disambiguation = ""
+					labels.append({'name':entry['name'], 'label_id':entry['id'], 'disambiguation':disambiguation})
 					labels = check_if_follows(request, 'labels', labels)
 
 
 		# ARTIST		
-		artist_url = "http://developer.echonest.com/api/v4/artist/extract?api_key=FBHCMLQRHBCWD8GVA&format=json&text="+query+"&results=10"
-		data = urllib2.urlopen(artist_url)
-		artist_results = json.load(data)
-		print artist_url
-		artists = []
-		for entry in artist_results['response']['artists']:
-			if len(artists) < 5:
-				artists.append({'name':entry['name']})
-				artists = check_if_follows(request, 'artists', artists)
+		# artist_url = "http://developer.echonest.com/api/v4/artist/extract?api_key=FBHCMLQRHBCWD8GVA&format=json&text="+query+"&results=10"
+		# data = urllib2.urlopen(artist_url)
+		# artist_results = json.load(data)
+		# print artist_url
+		# artists = []
+		# for entry in artist_results['response']['artists']:
+		# 	if len(artists) < 5:
+		# 		artists.append({'name':entry['name']})
+		# 		artists = check_if_follows(request, 'artists', artists)
 
+		# artists = []
+		# if not artists:
+		# 	api_results = mbz_search(query, 'artist', limit=10)
+		# 	print "results search sees: "
+		# 	print api_results
+		# 	artists = []
+		# # while len(artists) < 5:
+		# 	for entry in api_results['artist']:
+		# 		if len(artists) < 5:
+		# 			if entry["id"] not in mbids:
+		# 				mbids.append(entry["id"])
+		# 				if "disambiguation" in entry:
+		# 					disambiguation = entry['disambiguation']
+		# 				else:
+		# 					disambiguation = ""
+		# 				artists.append({'name':entry['name'], 'artist_id':entry['id'], 'disambiguation':disambiguation})
+		# 				# artists = check_if_follows(request, 'artists', artists)
 
-		if not artists:
-			api_results = mbz_search(query, 'artist', limit=10)
-			print "results search sees: "
-			print api_results
-			artists = []
-		# while len(artists) < 5:
-			for entry in api_results['artist']:
-				if len(artists) < 5:
-					if entry["id"] not in mbids:
-						mbids.append(entry["id"])
-						artists.append({'name':entry['name'], 'artist_id':entry['id']})
-						# artists = check_if_follows(request, 'artists', artists)
-
+		artists = searchArtists(query)
 
 	# 	#search releases
 	# 	api_results = mbz_search(query, 'release-group', limit=10)
@@ -700,19 +736,33 @@ def full_search(request):
 	# 				recordings.append({'title':entry['title'], 'artist':entry['artist-credit'][0]['artist']['name']})
 	# 				# releases = check_if_follows(request, 'artists', artists)
 	# 	print recordings
+		try:
+			track_url = "http://ws.audioscrobbler.com/2.0/?method=track.search&track="+query+"&api_key=c43db4e93f7608bb10d96fa5f69a74a1&format=json"
+			data = urllib2.urlopen(track_url)
+			track_results = json.load(data)
 
-		track_url = "http://ws.audioscrobbler.com/2.0/?method=track.search&track="+query+"&api_key=c43db4e93f7608bb10d96fa5f69a74a1&format=json"
-		data = urllib2.urlopen(track_url)
-		track_results = json.load(data)
-		tracks = []
-		for track in track_results['results']['trackmatches']['track']:
-			artist = track['artist']
-			title = track['name']
-			tracks.append({"artist":artist, 'title':title, 'type':'text'})
-		recordings = tracks
+			tracks = []
+			for track in track_results['results']['trackmatches']['track']:
+				artist = track['artist']
+				title = track['name']
+				tracks.append({"artist":artist, 'title':title, 'type':'text'})
+			recordings = tracks
+		except:
+			recordings = []
 
 		return render_to_response('scrapers/home.html',{'page':'search', 'artists':artists, 'labels':labels, 'releases':releases, 'sounds':recordings},context_instance=RequestContext(request))
 	
+	else:
+		return render_to_response('scrapers/home.html', {'page':'search'}, context_instance=RequestContext(request))
+
+
+def artist_search_view(request):
+	if 'query' in request.GET:
+		get = request.GET.copy()
+		query = get['query']
+		query = urllib.quote_plus(query.encode('utf8'))
+		artists = searchArtists(query)
+		return render_to_response('scrapers/home.html',{'page':'artist_search', 'artists':artists},context_instance=RequestContext(request))
 	else:
 		return render_to_response('scrapers/home.html', {'page':'search'}, context_instance=RequestContext(request))
 
@@ -724,19 +774,20 @@ def import_artists(request):
 def playlist_view(request, playlist_id):
 	playlist = User_playlist.objects.get(pk =playlist_id)
 
-
 	tracks = []
 	albums = []
 	for pl_entry in playlist.entries.all():
 
 		if pl_entry.sound:
 			entry = pl_entry.sound
-			track = {'title':entry.title, 'type': 'text'}
+			entry_id = pl_entry.pk
+			track = {'title':entry.title, 'type': 'text', 'entry_id':entry_id}
 			if entry.mbid:
 				track_id = entry.mbid
+				feast_id = entry.pk
 				artist_name = entry.artists.all()[0].name
 				artist_id = entry.artists.all()[0].mbid 
-				track.update({'track_id':track_id, 'artist':artist_name, 'artist_id':artist_id})
+				track.update({'track_id':track_id, 'artist':artist_name, 'artist_id':artist_id, 'feast_id':feast_id})
 				print "this is the playlistview processed track" 
 				print track
 			elif entry.artist_name:
@@ -746,22 +797,26 @@ def playlist_view(request, playlist_id):
 
 		if pl_entry.album:
 			entry = pl_entry.album
-			album = {'title': entry.title}
+			entry_id = pl_entry.pk
+			album = {'title': entry.title, 'entry_id':entry_id}
 			if entry.reid:
 				release_id = entry.reid
+				feast_id = entry.pk
 				artist_name = entry.artists.all()[0].name
 				artist_id = entry.artists.all()[0].mbid
 				album['reid'] = release_id
 				album['artist'] = artist_name
 				album['artist_id'] = artist_id
+				album['feast_id'] = feast_id
+
 
 			elif track['artist_name']:
 				artist_name = entry.artist_name
 				album['artist_name'] = artist_name
 			albums.append(album)
-
+		this_playlist = {"name":playlist.name,'description':playlist.description, 'pk':playlist.pk}
 	if albums or tracks:
-		return render_to_response('scrapers/home.html',{'page':'search', 'releases':albums, 'sounds':tracks},context_instance=RequestContext(request))
+		return render_to_response('scrapers/home.html',{'page':'playlist', 'releases':albums, 'sounds':tracks, 'playlist':this_playlist},context_instance=RequestContext(request))
 	else:
 		return HttpResponse("This is an empty playlist, add search to add albums and songs! Playlist #"+str(playlist_id))
 
@@ -884,10 +939,39 @@ def my_playlists(request):
 		return HttpResponse("You need to be logged in to have playlists")
 
 
+def remove_user_playlist(request):
+	if request.user.is_authenticated():
+		user = request.user
+		user_profile, up_created = UserProfile.objects.get_or_create(user = user)
+		if 'playlist_id' in request.POST:
+			playlist = User_playlist.objects.get(pk =request.POST['playlist_id'])
+			if playlist in user_profile.user_playlists.all():
+				playlist.delete()
+				return HttpResponse('success')
+			else:
+				return HttpResponse("You don't have permission to delete this",  status=401)
+		else:
+			return HttpResponse("no playlist ID passed",  status=400)
+	else:
+		return HttpResponse("You must be logged in to delete playlists",  status=401)
 
 
-
-
+def delete_playlist_entry(request):
+	if request.user.is_authenticated():
+		user = request.user
+		user_profile, up_created = UserProfile.objects.get_or_create(user = user)
+		if 'entry_id' in request.POST:
+			entry = User_playlist_entry.objects.get(pk =request.POST['entry_id'])
+			playlist = entry.user_playlist
+			if user_profile in playlist.users.all():
+				entry.delete()
+				return HttpResponse('success')
+			else:
+				return HttpResponse("You don't have permission to delete this",  status=401)
+		else:
+			return HttpResponse("no entry ID recieved",  status=400)
+	else:
+		return HttpResponse("You must be logged in to edit playlists",  status=401)
 
 
 

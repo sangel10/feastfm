@@ -75,6 +75,22 @@ def getRecordingByID(mbid):
 	return recording 
 
 
+def searchArtists(query, limit =5):
+	artists = []
+	api_results = mbz_search(query, 'artist', limit=10)
+	print "results search sees: "
+	print api_results
+	artists = []
+	for entry in api_results['artist']:
+		if len(artists) < limit:
+			# if entry["id"] not in mbids:
+			# 	mbids.append(entry["id"])
+			if "disambiguation" in entry:
+				disambiguation = entry['disambiguation']
+			else:
+				disambiguation = ""
+			artists.append({'name':entry['name'], 'artist_id':entry['id'], 'disambiguation':disambiguation})
+	return artists
 
 
 def get_browse_releases(query_type, mbid_or_query, rgids = None):

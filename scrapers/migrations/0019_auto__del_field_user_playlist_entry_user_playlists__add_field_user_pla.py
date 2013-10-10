@@ -209,7 +209,7 @@ class Migration(SchemaMigration):
             'album': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'user_playlist_entries'", 'null': 'True', 'to': "orm['scrapers.Album']"}),
             'date_added': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now', 'blank': 'True'}),
             'embed': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'user_playlist_entries'", 'null': 'True', 'to': "orm['scrapers.Embed']"}),
-            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            # 'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'position': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
             'sound': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'user_playlist_entries'", 'null': 'True', 'to': "orm['scrapers.Sound']"}),
             'user_playlist': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'entries'", 'null': 'True', 'to': "orm['scrapers.User_playlist']"})

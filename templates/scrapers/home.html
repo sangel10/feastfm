@@ -46,7 +46,7 @@
     <!-- <link href="/static/noUiSlider-3.2.1/nouislider.space.css" rel="stylesheet" type="text/css"> -->
     <script src="{{ STATIC_URL }}noUiSlider-3.2.1/jquery.nouislider.min.js"></script>
     <link href = "{{ STATIC_URL }}bootstrap3/css/bootstrap.css" rel="stylesheet">
-    <link href="{{ STATIC_URL }}bootstrap3/css/navbar-static-top.css" rel="stylesheet">
+    <!-- <link href="{{ STATIC_URL }}bootstrap3/css/navbar-static-top.css" rel="stylesheet"> -->
 
     <style>
     .red{
@@ -55,9 +55,63 @@
 /*    .scrollable{
         height: 300px;
     }*/
-    div[class=" "] {
+    /*div[class=" "] {
     width: 550px;
-}
+    }*/
+
+    /*.scrollable{
+        height:100px;
+        overflow-y:auto;
+    }*/
+    /*html,body { 
+       height: 100%; 
+       overflow: hidden; 
+    } */
+    .scrollable {
+        /*height: 500px;*/
+        /*height:99%;*/
+        overflow: auto;
+    }
+
+    body {
+      /*min-height: 2000px;*/
+        margin-top: 70px;
+        margin-bottom: 30px;
+        overflow:hidden;
+    }
+
+    .navbar-static-top {
+      margin-bottom: 19px;
+    }
+
+
+    /*body{
+        overflow:hidden;  This will remove the default scroll, not really needed, safer nonetheless 
+    }
+*/
+    .music{
+        /*padding-top:25px;
+        padding-bottom:100px;
+
+        padding-right:50px;
+        padding-left:50px;*/
+
+       /* margin-top:100px;
+        margin-bottom:100px;
+        margin-right:50px;
+        margin-left:50px;*/
+    }
+
+    .popover-content {
+    max-height: 300px;
+    overflow-y: auto;
+    }
+    .popover {
+    max-width: 600px;
+    width: 450px;
+    /*width: fit-content; */
+    /*display: inline-block;*/
+    }
     </style>
 
 
@@ -79,7 +133,7 @@
         
         <div class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
-            <li><a href = "/stream">Stream</a></li>
+            <li><a href = "/stream">Stream</a></li> 
           </ul>
 
 
@@ -104,7 +158,7 @@
               </form>
 
           <ul class="nav navbar-nav navbar-right">
-            <li><a href = "#current-track" id = "now-playing">Artist-Title</a></li>
+            <li><a href = "#" id = "now-playing">Artist-Title</a></li>
             <li><a>
                 <span class="glyphicon glyphicon-backward" id = "play-previous">
                 </a>
@@ -141,8 +195,8 @@
       </div>
     </div>
 
-<!-- <div class = "row"> -->
-    <div class="container col-md-8 scrollable"> <!-- col-md-offset-0 -->
+<div class = "row">
+    <div class="container col-md-8 scrollable music"> <!-- col-md-offset-0 -->
 
 
     {% if page == 'create_playlist' %}
@@ -171,14 +225,14 @@
 
 
 
-        <div id="player">
+        <!-- <div id="player">
         </div>
 
         <br>
         <br>
         <div class="noUiSlider"></div>
 
-        <br>
+        <br> -->
 
 <!--         <button type="button" id ="play-previous">Previous</button>
         <button type="button" id ="play-pause">Pause/Unpause</button>
@@ -219,7 +273,17 @@
                 </a>
                 
                 <div class="media-body">
-                  <h3 class="media-heading"><a href = "/artist_name/{{ release.artist|escape }}"><strong>{{release.artist}}</strong>  </a> <button type = "button" class = "btn btn-default follow-artist" data-artist-id = "{{ release.artist_id }}" data-following-artist = "{{release.following_artist}}">{{release.following_artist}}</button>
+                  <h3 class="media-heading">
+
+                    {%if release.artist_id%}
+                    <a href = "/artist/{{ release.artist_id }}">
+                    {% else %}
+                    <!-- <a href = "/artist_name/{{ release.artist|escape }}"> -->
+                    <a href = "/artist_search/?query={{ release.artist|escape }}">
+                    {% endif %}
+                    
+
+                    <strong>{{release.artist}}</strong>  </a> <button type = "button" class = "btn btn-default follow-artist" data-artist-id = "{{ release.artist_id }}" data-following-artist = "{{release.following_artist}}">{{release.following_artist}}</button>
                     
                     <div class = "pull-right" >
                     <span class = "expand-album" >  
@@ -242,8 +306,14 @@
                     </span></a>
                     {% endif %}
 
+
+                    
                     <a ><span title = "add to playlist" class="glyphicon glyphicon-plus add-album"></span></a>    
                       <a title = "Play album" class = "btn btn-default"><span data-reid = "{{release.reid}}" class="glyphicon glyphicon-play play-entire-album"></span></a>
+                    {%if page == "playlist" %}
+                        <a title = "Delete album" ><span data-reid = "{{release.reid}}" data-playlist-id = {{playlist.pk}} data-entry-id = {{release.entry_id}} data-feast-id ={{release.feast_id}} class="glyphicon glyphicon-remove delete-album"></span></a>
+                    {% endif %}
+
                     </div>
                     <br>
                     <em>{{release.title}}</em>
@@ -339,7 +409,26 @@
             data-id = "{{sound.id}}"
             > 
                 <a><span class="glyphicon glyphicon-play play-track"></span></a>
-                <a href = "/artist_name/{{ sound.artist|urlencode }}">{{sound.artist}} </a> - {{sound.title}} 
+
+                {%if sound.artist_id%}
+                    <a href = "/artist/{{ sound.artist_id }}">
+                    {% else %}
+                    <!-- <a href = "/artist_name/{{ sound.artist|escape }}"> -->
+                    <a href = "/artist_search/?query={{ sound.artist|escape }}">
+                        
+                    {% endif %}
+                <!-- <a href = "/artist_name/{{ sound.artist|urlencode }}"> -->
+
+
+                    {{sound.artist}} </a> - {{sound.title}} 
+
+                {%if page == "playlist" %}
+                    <a title = "Delete track" class = "pull-right"><span data-reid = "{{sound.track_id}}" data-playlist-id = {{playlist.pk}} data-feast-id = "{{sound.feast_id}}"
+                        data-entry-id = {{sound.entry_id}}
+                        class="glyphicon glyphicon-remove delete-track"></span></a>
+                {% endif %}
+
+                <a class="pull-right" title="Add to Playlist"><span class="glyphicon glyphicon-plus playlist-add add-track"></span></a>
                 <a class="pull-right" title="Love Track">
 
                     {% if sound.following_sound %}
@@ -349,7 +438,7 @@
                     {% endif %}
                     </a>
                    
-                <a class="pull-right" title="Add to Playlist"><span class="glyphicon glyphicon-plus playlist-add add-track"></span></a>
+                
             <!-- </h5> -->
             </li>
         {% endfor %}
@@ -399,7 +488,12 @@
                 <!-- <img width="150" height="150" src="http://ws.audioscrobbler.com/2.0/?method=artist.imageredirect&amp;mbid={{artist.artist_id}}&amp;autocorrect=1&amp;size=largesquare&amp;api_key=c43db4e93f7608bb10d96fa5f69a74a1"> -->
                 <img width="150" height="150" src="http://ws.audioscrobbler.com/2.0/?method=artist.imageredirect&amp;artist={{artist.name|escape}}&amp;autocorrect=1&amp;size=largesquare&amp;api_key=c43db4e93f7608bb10d96fa5f69a74a1">
                 <div>
-                <a href = "/artist_name/{{artist.name}}">  {{ artist.name }}</a>
+                <a href = "/artist/{{artist.artist_id}}">  {{ artist.name }}</a>
+
+                {%if artist.disambiguation%}
+                    <span>({{artist.disambiguation}})</span
+                {%endif%}
+
                 <span >
                     <button type="button" data-artist-id = "{{ artist.artist_id }}" class ="follow-artist">
                         {{artist.following_artist}}
@@ -417,6 +511,9 @@
         <ul type=none id = "labels">
         {% for label in labels %}
             <li><a href = "/label/{{label.label_id}}">  {{ label.name }}</a>
+                {%if label.disambiguation%}
+                    <span>({{label.disambiguation}})</span
+                {%endif%}
                 <span >
                     <button type="button" data-label-name = "{{ label.name }}" data-label-id = "{{ label.label_id }}" class ="follow-label">
                         {{label.following_label}}
@@ -430,10 +527,12 @@
 
     {% if playlists%}
     <ul><h2>Playlists</h2><ul>
+        <li><h3><a href= "/create_playlist/">Create New Playlist</a><h3></li>
         {% for playlist in playlists %}
-        <li>
+        <li class= "playlist">
             <h3>
                 <a href= "/playlist/{{playlist.pk}}"    >{{playlist.name}}</a>
+                <a><span class="glyphicon glyphicon-remove pull-right delete-playlist" data-playlist-id = {{playlist.pk}}></span></a>
             </h3>
             <h4>
                 <div>{{playlist.description}}</div>
@@ -447,11 +546,44 @@
     </div>
 
     <div class="container col-md-4 scrollable">
-        TEST////
+        <div id="player">
+        </div>
+
+        <br>
+        <br>
+        <div class="noUiSlider"></div>
+
+        <br>
+        <ul>
+            <li><h1>top<h1></li>
+            <li><h1>tasdfasdf<h1></li>
+            <li><h1>tasdfasdf<h1></li>
+            <li><h1>tasdfasdf<h1></li>
+            <li><h1>tasdfasdf<h1></li>
+            <li><h1>tasdfasdf<h1></li>
+            <li><h1>tasdfasdf<h1></li>
+            <li><h1>tasdfasdf<h1></li>
+            <li><h1>tasdfasdf<h1></li>
+            <li><h1>tasdfasdf<h1></li>
+            <li><h1>tasdfasdf<h1></li>
+            <li><h1>mid<h1></li>
+            <li><h1>tasdfasdf<h1></li>
+            <li><h1>tasdfasdf<h1></li>
+            <li><h1>tasdfasdf<h1></li>
+            <li><h1>tasdfasdf<h1></li>
+            <li><h1>tasdfasdf<h1></li>
+            <li><h1>tasdfasdf<h1></li>
+            <li><h1>tasdfasdf<h1></li>
+            <li><h1>tasdfasdf<h1></li>
+            <li><h1>tasdfasdf<h1></li>
+            <li><h1>tasdfasdf<h1></li>
+            <li><h1>tasdfasdf<h1></li>
+            <li><h1>end<h1></li>
+        </ul>
     </div>
 
 
-<!-- </div> -->
+</div>
 
 
 
