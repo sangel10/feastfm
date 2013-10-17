@@ -193,11 +193,11 @@ INSTALLED_APPS = (
     # 'django.contrib.admin',
     # Uncomment the next line to enable admin documentation:
     # 'django.contrib.admindocs',
+    'south',
     'scrapers',
     'kombu.transport.django',  
     'djcelery',
     'celerytest',
-    'south',
     'musicbrainz',
     'registration',
 )
