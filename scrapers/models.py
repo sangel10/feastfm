@@ -232,8 +232,8 @@ class User_playlist_entry(models.Model):
 	date_added = models.DateTimeField(default=datetime.now, blank=True)
 
 	
-class test(models.Model):
-	name = models.CharField(max_length = 500, blank = True)
+# class test(models.Model):
+# 	name = models.CharField(max_length = 500, blank = True)
 
 
 
