@@ -13,6 +13,7 @@ class Migration(SchemaMigration):
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('original_slug', self.gf('django.db.models.fields.CharField')(max_length=500)),
             ('title', self.gf('django.db.models.fields.CharField')(max_length=500, blank=True)),
+            ('artist_name', self.gf('django.db.models.fields.CharField')(max_length=500, blank=True)),
             ('yt_track_id', self.gf('django.db.models.fields.CharField')(max_length=500, blank=True)),
             ('sc_track_id', self.gf('django.db.models.fields.CharField')(max_length=500, blank=True)),
             ('vimeo_track_id', self.gf('django.db.models.fields.CharField')(max_length=500, blank=True)),
@@ -353,8 +354,9 @@ class Migration(SchemaMigration):
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('title', self.gf('django.db.models.fields.CharField')(max_length=500, blank=True)),
             ('full_title', self.gf('django.db.models.fields.CharField')(max_length=500, blank=True)),
-            ('album_type', self.gf('django.db.models.fields.CharField')(max_length=500, blank=True)),
-            ('mbid', self.gf('django.db.models.fields.CharField')(max_length=500, blank=True)),
+            ('artist_name', self.gf('django.db.models.fields.CharField')(max_length=500, blank=True)),
+            ('reid', self.gf('django.db.models.fields.CharField')(max_length=500, blank=True)),
+            ('scraped', self.gf('django.db.models.fields.BooleanField')(default=False)),
         ))
         db.send_create_signal('scrapers', ['Album'])
 
@@ -457,50 +459,17 @@ class Migration(SchemaMigration):
         ))
         db.create_unique(m2m_table_name, ['embed_id', 'sound_id'])
 
-        # Adding model 'User_playlist_entry'
-        db.create_table('scrapers_user_playlist_entry', (
-            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
-            ('position', self.gf('django.db.models.fields.IntegerField')(null=True, blank=True)),
-        ))
-        db.send_create_signal('scrapers', ['User_playlist_entry'])
-
-        # Adding M2M table for field sounds on 'User_playlist_entry'
-        m2m_table_name = db.shorten_name('scrapers_user_playlist_entry_sounds')
-        db.create_table(m2m_table_name, (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('user_playlist_entry', models.ForeignKey(orm['scrapers.user_playlist_entry'], null=False)),
-            ('sound', models.ForeignKey(orm['scrapers.sound'], null=False))
-        ))
-        db.create_unique(m2m_table_name, ['user_playlist_entry_id', 'sound_id'])
-
-        # Adding M2M table for field embeds on 'User_playlist_entry'
-        m2m_table_name = db.shorten_name('scrapers_user_playlist_entry_embeds')
-        db.create_table(m2m_table_name, (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('user_playlist_entry', models.ForeignKey(orm['scrapers.user_playlist_entry'], null=False)),
-            ('embed', models.ForeignKey(orm['scrapers.embed'], null=False))
-        ))
-        db.create_unique(m2m_table_name, ['user_playlist_entry_id', 'embed_id'])
-
-        # Adding M2M table for field albums on 'User_playlist_entry'
-        m2m_table_name = db.shorten_name('scrapers_user_playlist_entry_albums')
-        db.create_table(m2m_table_name, (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('user_playlist_entry', models.ForeignKey(orm['scrapers.user_playlist_entry'], null=False)),
-            ('album', models.ForeignKey(orm['scrapers.album'], null=False))
-        ))
-        db.create_unique(m2m_table_name, ['user_playlist_entry_id', 'album_id'])
-
         # Adding model 'User_playlist'
         db.create_table('scrapers_user_playlist', (
             ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
             ('name', self.gf('django.db.models.fields.CharField')(max_length=500, blank=True)),
             ('date_created', self.gf('django.db.models.fields.DateTimeField')(default=datetime.datetime.now, blank=True)),
+            ('description', self.gf('django.db.models.fields.TextField')(blank=True)),
         ))
         db.send_create_signal('scrapers', ['User_playlist'])
 
-        # Adding M2M table for field user on 'User_playlist'
-        m2m_table_name = db.shorten_name('scrapers_user_playlist_user')
+        # Adding M2M table for field users on 'User_playlist'
+        m2m_table_name = db.shorten_name('scrapers_user_playlist_users')
         db.create_table(m2m_table_name, (
             ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
             ('user_playlist', models.ForeignKey(orm['scrapers.user_playlist'], null=False)),
@@ -508,14 +477,24 @@ class Migration(SchemaMigration):
         ))
         db.create_unique(m2m_table_name, ['user_playlist_id', 'userprofile_id'])
 
-        # Adding M2M table for field entries on 'User_playlist'
-        m2m_table_name = db.shorten_name('scrapers_user_playlist_entries')
-        db.create_table(m2m_table_name, (
-            ('id', models.AutoField(verbose_name='ID', primary_key=True, auto_created=True)),
-            ('user_playlist', models.ForeignKey(orm['scrapers.user_playlist'], null=False)),
-            ('user_playlist_entry', models.ForeignKey(orm['scrapers.user_playlist_entry'], null=False))
+        # Adding model 'User_playlist_entry'
+        db.create_table('scrapers_user_playlist_entry', (
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('user_playlist', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='entries', null=True, to=orm['scrapers.User_playlist'])),
+            ('sound', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='user_playlist_entries', null=True, to=orm['scrapers.Sound'])),
+            ('embed', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='user_playlist_entries', null=True, to=orm['scrapers.Embed'])),
+            ('album', self.gf('django.db.models.fields.related.ForeignKey')(blank=True, related_name='user_playlist_entries', null=True, to=orm['scrapers.Album'])),
+            ('position', self.gf('django.db.models.fields.IntegerField')(null=True, blank=True)),
+            ('date_added', self.gf('django.db.models.fields.DateTimeField')(default=datetime.datetime.now, blank=True)),
         ))
-        db.create_unique(m2m_table_name, ['user_playlist_id', 'user_playlist_entry_id'])
+        db.send_create_signal('scrapers', ['User_playlist_entry'])
+
+        # Adding model 'test'
+        db.create_table('scrapers_test', (
+            ('id', self.gf('django.db.models.fields.AutoField')(primary_key=True)),
+            ('name', self.gf('django.db.models.fields.CharField')(max_length=500, blank=True)),
+        ))
+        db.send_create_signal('scrapers', ['test'])
 
 
     def backwards(self, orm):
@@ -666,26 +645,17 @@ class Migration(SchemaMigration):
         # Removing M2M table for field sounds on 'Embed'
         db.delete_table(db.shorten_name('scrapers_embed_sounds'))
 
-        # Deleting model 'User_playlist_entry'
-        db.delete_table('scrapers_user_playlist_entry')
-
-        # Removing M2M table for field sounds on 'User_playlist_entry'
-        db.delete_table(db.shorten_name('scrapers_user_playlist_entry_sounds'))
-
-        # Removing M2M table for field embeds on 'User_playlist_entry'
-        db.delete_table(db.shorten_name('scrapers_user_playlist_entry_embeds'))
-
-        # Removing M2M table for field albums on 'User_playlist_entry'
-        db.delete_table(db.shorten_name('scrapers_user_playlist_entry_albums'))
-
         # Deleting model 'User_playlist'
         db.delete_table('scrapers_user_playlist')
 
-        # Removing M2M table for field user on 'User_playlist'
-        db.delete_table(db.shorten_name('scrapers_user_playlist_user'))
+        # Removing M2M table for field users on 'User_playlist'
+        db.delete_table(db.shorten_name('scrapers_user_playlist_users'))
 
-        # Removing M2M table for field entries on 'User_playlist'
-        db.delete_table(db.shorten_name('scrapers_user_playlist_entries'))
+        # Deleting model 'User_playlist_entry'
+        db.delete_table('scrapers_user_playlist_entry')
+
+        # Deleting model 'test'
+        db.delete_table('scrapers_test')
 
 
     models = {
@@ -727,12 +697,13 @@ class Migration(SchemaMigration):
         },
         'scrapers.album': {
             'Meta': {'object_name': 'Album'},
-            'album_type': ('django.db.models.fields.CharField', [], {'max_length': '500', 'blank': 'True'}),
+            'artist_name': ('django.db.models.fields.CharField', [], {'max_length': '500', 'blank': 'True'}),
             'artists': ('django.db.models.fields.related.ManyToManyField', [], {'blank': 'True', 'related_name': "'albums'", 'null': 'True', 'symmetrical': 'False', 'to': "orm['scrapers.Artist']"}),
             'full_title': ('django.db.models.fields.CharField', [], {'max_length': '500', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'labels': ('django.db.models.fields.related.ManyToManyField', [], {'blank': 'True', 'related_name': "'albums'", 'null': 'True', 'symmetrical': 'False', 'to': "orm['scrapers.Label']"}),
-            'mbid': ('django.db.models.fields.CharField', [], {'max_length': '500', 'blank': 'True'}),
+            'reid': ('django.db.models.fields.CharField', [], {'max_length': '500', 'blank': 'True'}),
+            'scraped': ('django.db.models.fields.BooleanField', [], {'default': 'False'}),
             'title': ('django.db.models.fields.CharField', [], {'max_length': '500', 'blank': 'True'})
         },
         'scrapers.artist': {
@@ -833,6 +804,7 @@ class Migration(SchemaMigration):
         },
         'scrapers.sound': {
             'Meta': {'object_name': 'Sound'},
+            'artist_name': ('django.db.models.fields.CharField', [], {'max_length': '500', 'blank': 'True'}),
             'date_created': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now', 'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'length': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
@@ -855,21 +827,28 @@ class Migration(SchemaMigration):
             'sounds': ('django.db.models.fields.related.ManyToManyField', [], {'symmetrical': 'False', 'related_name': "'source'", 'null': 'True', 'to': "orm['scrapers.Sound']"}),
             'url': ('django.db.models.fields.TextField', [], {'unique': 'True', 'blank': 'True'})
         },
+        'scrapers.test': {
+            'Meta': {'object_name': 'test'},
+            'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
+            'name': ('django.db.models.fields.CharField', [], {'max_length': '500', 'blank': 'True'})
+        },
         'scrapers.user_playlist': {
             'Meta': {'object_name': 'User_playlist'},
             'date_created': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now', 'blank': 'True'}),
-            'entries': ('django.db.models.fields.related.ManyToManyField', [], {'blank': 'True', 'related_name': "'user_playlists'", 'null': 'True', 'symmetrical': 'False', 'to': "orm['scrapers.User_playlist_entry']"}),
+            'description': ('django.db.models.fields.TextField', [], {'blank': 'True'}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'name': ('django.db.models.fields.CharField', [], {'max_length': '500', 'blank': 'True'}),
-            'user': ('django.db.models.fields.related.ManyToManyField', [], {'blank': 'True', 'related_name': "'user_playlists'", 'null': 'True', 'symmetrical': 'False', 'to': "orm['scrapers.UserProfile']"})
+            'users': ('django.db.models.fields.related.ManyToManyField', [], {'blank': 'True', 'related_name': "'user_playlists'", 'null': 'True', 'symmetrical': 'False', 'to': "orm['scrapers.UserProfile']"})
         },
         'scrapers.user_playlist_entry': {
             'Meta': {'object_name': 'User_playlist_entry'},
-            'albums': ('django.db.models.fields.related.ManyToManyField', [], {'blank': 'True', 'related_name': "'user_playlist_entries'", 'null': 'True', 'symmetrical': 'False', 'to': "orm['scrapers.Album']"}),
-            'embeds': ('django.db.models.fields.related.ManyToManyField', [], {'blank': 'True', 'related_name': "'user_playlist_entries'", 'null': 'True', 'symmetrical': 'False', 'to': "orm['scrapers.Embed']"}),
+            'album': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'user_playlist_entries'", 'null': 'True', 'to': "orm['scrapers.Album']"}),
+            'date_added': ('django.db.models.fields.DateTimeField', [], {'default': 'datetime.datetime.now', 'blank': 'True'}),
+            'embed': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'user_playlist_entries'", 'null': 'True', 'to': "orm['scrapers.Embed']"}),
             'id': ('django.db.models.fields.AutoField', [], {'primary_key': 'True'}),
             'position': ('django.db.models.fields.IntegerField', [], {'null': 'True', 'blank': 'True'}),
-            'sounds': ('django.db.models.fields.related.ManyToManyField', [], {'blank': 'True', 'related_name': "'user_playlist_entries'", 'null': 'True', 'symmetrical': 'False', 'to': "orm['scrapers.Sound']"})
+            'sound': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'user_playlist_entries'", 'null': 'True', 'to': "orm['scrapers.Sound']"}),
+            'user_playlist': ('django.db.models.fields.related.ForeignKey', [], {'blank': 'True', 'related_name': "'entries'", 'null': 'True', 'to': "orm['scrapers.User_playlist']"})
         },
         'scrapers.userprofile': {
             'Meta': {'object_name': 'UserProfile'},

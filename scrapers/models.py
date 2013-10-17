@@ -193,7 +193,7 @@ def create_user_profile(sender, instance, created, **kwargs):
 post_save.connect(create_user_profile, sender=User)
 
 
-
+	
 
 class Embed(models.Model):
 	playlist_boolean = models.NullBooleanField()
@@ -232,7 +232,8 @@ class User_playlist_entry(models.Model):
 	date_added = models.DateTimeField(default=datetime.now, blank=True)
 
 	
-
+class test(models.Model):
+	name = models.CharField(max_length = 500, blank = True)
 
 
 
