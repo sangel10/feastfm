@@ -284,6 +284,7 @@ def search(request):
 
 def stream(request):
 	if request.user.is_authenticated():
+
 		artist_set = request.user.get_profile().artists.all()
 		print artist_set
 		artist_ids = []
@@ -325,6 +326,7 @@ def stream(request):
 
 def check_if_follows(request, model_type, list_of_entities):
 	if request.user.is_authenticated():
+		user_profile, up_created = UserProfile.objects.get_or_create(user = request.user)
 		print "check if follows, user is authenticated"
 		#ARTISTS
 		if model_type == 'artists':
