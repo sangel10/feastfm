@@ -159,9 +159,9 @@
 
 
 
-               <form action="/search" method="get" class="navbar-form navbar-left" role="search">
+               <form title = "Search for Artists, Labels, Albums, and Tracks" action="/search" method="get" class="navbar-form navbar-left" role="search">
                 <div class="form-group">
-                  <input type="text" name = "query" id = 'query' class="form-control" placeholder="Search">
+                  <input type="text" name = "query" id = 'query' class="form-control"  >
                 </div>
                 <button type="submit" class="btn btn-default">Search</button>
               </form>
@@ -218,6 +218,7 @@
         <input type="submit" value="Submit" />
         </form>
     {% endif %}
+
 
 
 
@@ -536,6 +537,13 @@
         </ul>
 
         {% endif %}
+
+    {% if page == 'my_playlist' %}
+    <h2><a href = "/create_playlist" > CREATE PLAYLIST</a></h2>
+
+    {% endif %}
+
+
 
     {% if playlists%}
     <ul><h2>Playlists</h2><ul>

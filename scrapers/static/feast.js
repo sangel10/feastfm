@@ -310,10 +310,9 @@ function addPopover(e, add_class){
                 $div2.append($a)
                 $div2.append($add_button)
                 $div.append($div2)
-                var $h5 = $("<h5>")
-                $h5.append($div)
             }
-
+            var $h5 = $("<h5>")
+            $h5.append($div)
             // $('body').popover({
             //         selector: '[rel=popover]'
             // })
