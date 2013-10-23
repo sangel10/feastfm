@@ -944,8 +944,8 @@ def my_playlists(request):
 	if request.user.is_authenticated():
 		user = request.user
 		playlists = get_user_playlists(user)	
-
-		return render_to_response('scrapers/home.html', {'page':"my_playlist", 'playlists':playlists}, context_instance=RequestContext(request))
+		# return render_to_response('scrapers/home.html', {'page':"my_playlist", 'playlists':playlists}, context_instance=RequestContext(request))
+		return render_to_response('scrapers/my_playlists.html', {'page':"my_playlist", 'playlists':playlists}, context_instance=RequestContext(request))
 	else:
 		# return HttpResponse("You need to be logged in to have playlists")
 		return render_to_response('scrapers/message.html', {'message': "You need to be logged in to have playlists" }, context_instance=RequestContext(request))

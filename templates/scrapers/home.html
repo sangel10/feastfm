@@ -9,64 +9,12 @@
     <div class="container col-md-8 scrollable music"> <!-- col-md-offset-0 -->
 
 
-    {% if page == 'create_playlist' %}
-    CREATE PLAYLIST
-        <form action="/create_playlist/" method="post">{% csrf_token %}
-        {{ form.as_p }}
-        <input type="submit" value="Submit" />
-        </form>
-    {% endif %}
-
-
-
-
-
-
-<!--         <div id = "login">
-        {% if user and user.is_authenticated %}
-            <p>Logged in as: {{ user.username }}</p>
-            <a href='/accounts/logout'> Logout </a>
-        {% else %}
-                <a href = '/accounts/login'> Login </a>
-                <br/>
-                <a href = '/accounts/register'> Register </a>
-        {% endif %}
-        </div>
- -->
-
-
-
-        <!-- <div id="player">
-        </div>
-
-        <br>
-        <br>
-        <div class="noUiSlider"></div>
-
-        <br> -->
-
-<!--         <button type="button" id ="play-previous">Previous</button>
-        <button type="button" id ="play-pause">Pause/Unpause</button>
-        <button type="button" id ="play-next">Next</button> -->
-       <!--  <br>
-        <button type="button" id ="track-seek">track.seek()</button>
- -->
-<!--         <br></br>
-        <button type="button" id ="artist-sort">Sort by Artist</button>
-        <button type="button" id="label-sort">Sort by Label</button>
-        <button type="button" id="date-sort">Sort by Date</button>
-        <button type="button" id="catalog-sort">Sort by Catalog Number </button>
-        <button type="button" id="type-sort">Sort by Type of Release </button>
- -->
-
-        <!-- <img width="200" height="200" src="http://ws.audioscrobbler.com/2.0/?method=artist.imageredirect&amp;artist=JAY+Z+Picasso+Baby&amp;autocorrect=1&amp;size=largesquare&amp;api_key=a81521f42db5b48e3a474f30d1c9814d" class="to-begin-loading">
-         -->
-
         {% if releases %}
-<!--         <ul> Releases: -->
+
          <h2 > Releases </h2>
         {% for release in releases %}
-        <li class = "release">
+
+        <li class = "release" style="list-style-type: none;">
             <div class="media album stream-item release" 
             data-artist = "{{release.artist}}"
             data-artist-id = "{{release.artist_id}}"
@@ -142,64 +90,15 @@
                   <h5 class = "date">{{release.date}}</h5>
                   <h4>
                   <ul type ="none" class = "album-tracks">
-                   <!--  <li><a href = "#"><span class="glyphicon glyphicon-play"></span></a> <a href = "">Artist</a> - track 1 
-                      <a title = "Love track" href = "#"><span class="glyphicon glyphicon-heart"></span></a>
-                      <a title ="Add to playlist"><span class="glyphicon glyphicon-plus"></span></a>
-                    </li> -->
-                <!--     <li><a href = "#"><span class="glyphicon glyphicon-play"></span></a> <a href = "">Artist</a> - track 1 
-                      <a href = "#"><span class="glyphicon glyphicon-heart"></span></a>
-                      <a ><span class="glyphicon glyphicon-plus"></span></a>
-                    </li><li><a href = "3"><span class="glyphicon glyphicon-play"></span></a> <a href = "">Artist</a> - track 1 
-                      <a href = "#"><span class="glyphicon glyphicon-heart"></span></a>
-                      <a ><span class="glyphicon glyphicon-plus"></span></a>
-                    </li><li><a href = "3"><span class="glyphicon glyphicon-play"></span></a> <a href = "">Artist</a> - track 1 
-                      <a href = "#"><span class="glyphicon glyphicon-heart"></span></a>
-                      <a ><span class="glyphicon glyphicon-plus"></span></a>
-                    </li> -->
+
                   </h4>
                   </ul>
                 </div>
               </div>
             </li>
 
-<!-- 
-
-
-            <ul data-reid = "{{release.reid}}" data-artist ="{{ release.artist }}" data-title ="{{release.title}}" data-date = "{{release.date}}"data-label ="{{release.label}}" data-catalog-number = "{{release.cat_num}}" class = "stream-item release" > 
-                <div>
-                    <img width = "100" height="100" src = "http://ws.audioscrobbler.com/2.0/?method=album.imageredirect&amp;mbid={{release.reid}}&amp;autocorrect=1&amp;size=largesquare&amp;api_key=c43db4e93f7608bb10d96fa5f69a74a1">
-                    <img width = "100" height="100" src = "http://ws.audioscrobbler.com/2.0/?method=album.imageredirect&amp;artist={{release.artist|escape}}&amp;album={{release.title|escape}}&amp;autocorrect=1&amp;size=largesquare&amp;api_key=c43db4e93f7608bb10d96fa5f69a74a1">
-                </div>
-
-
-                <a href = "/artist/{{ release.artist_id|escape }}">
-                
-                 {{ release.artist }} </a> 
-                <span >
-                    <button type="button" data-artist-id = "{{ release.artist_id }}" class ="follow-artist">
-                        {{ release.following_artist }}
-                    </button>
-                </span>
-
-                <div class = 'album'> {{release.title}}
-                <span class = "release-type">[{{release.primary_type}}] 
-                    {% if release.secondary_types %} 
-                    {{release.secondary_types}}  
-                    {% endif %} 
-                </span>
-                <span class = "date">{{release.date}}</span>
-                </div>
-                <div class = "label"><a class = "label-link" href = "/label/{{ release.label_id|escape }}" >{{release.label}}</a>
-                    <span>
-                        <button type="button" data-label-id = "{{ release.label_id }}" class ="follow-label">
-                            {{release.following_label}}
-                        </button>
-                    </span>
-                </div>
-                <div class = "catalog-number">{{release.cat_num}}</div>
-            </ul> -->
         {% endfor %}
-        <!-- </ul> -->
+
         {% endif %}
 
         {% if title %}
@@ -256,39 +155,7 @@
         </ul>
         {%endif %}
 
-    {% if page == 'advanced_search' %}
-        <form action="/lastfm_search" method="get">
-        {% csrf_token %}
-        Last.FM Username: <input type="text" id = "username" name = "username">
-        <input type="submit" value="search" />
-        </form>
 
-        <form action="/soundcloud_search" method="get">
-        {% csrf_token %}
-
-        Search for: 
-        <select id="query-type" name= 'query-type'>
-                <option value="artist">artist</option>
-                <option value="label">label</option>
-            </select>
-        by SoundCloud Username: <input type="text" id = "username" name = "username">
-        <input type="submit" value="search" />
-        </form>
-    
-
-
-        <form action="/search" method="get">
-        {% csrf_token %}
-        Search for: 
-            <select id="query-type" name= 'query-type'>
-                <option value="artist">artist</option>
-                <option value="label">label</option>
-            </select>
-            <input type="text" name = "query" id = 'query'>
-            <input type="submit"/>
-        </form>
-
-    {% endif %}
 
 
         {% if artists %}
@@ -343,7 +210,7 @@
 
 
 
-    {% if playlists%}
+<!--     {% if playlists%}
     <ul><h2>Playlists</h2><ul>
         <li><h3><a href= "/create_playlist/">Create New Playlist</a><h3></li>
         {% for playlist in playlists %}
@@ -358,7 +225,7 @@
         </li>
         {% endfor %}
 
-    {% endif%}
+    {% endif%} -->
 
 
     </div>

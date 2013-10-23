@@ -1,0 +1,23 @@
+
+{% extends 'scrapers/base.html' %}
+
+
+{% block content %}
+
+<div style = "padding-top:5%; width:80%">
+    <ul><h2 style="text-align:center;	">Playlists</h2><ul>
+        <li><h3><a href= "/create_playlist/">Create New Playlist</a><h3></li>
+        {% for playlist in playlists %}
+        <li class= "playlist">
+            <h3>
+                <a href= "/playlist/{{playlist.pk}}"    >{{playlist.name}}</a>
+                <a><span class="glyphicon glyphicon-remove pull-right delete-playlist" data-playlist-id = {{playlist.pk}}></span></a>
+            </h3>
+            <h4>
+                <div>{{playlist.description}}</div>
+            <h4>
+        </li>
+        {% endfor %}
+</div>
+
+{% endblock %}
