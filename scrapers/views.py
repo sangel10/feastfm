@@ -321,7 +321,10 @@ def stream(request):
 		return render_to_response('scrapers/home.html',{'page':'stream', 'releases':releases}, context_instance=RequestContext(request))
 
 	else:
-		return HttpResponse("You need to be logged in to have a stream")
+		# return HttpResponse("You need to be logged in to have a stream")
+		message = "You need to be logged in to have a stream"
+		return render_to_response('scrapers/message.html', {'message': message }, context_instance=RequestContext(request))
+
 
 
 def check_if_follows(request, model_type, list_of_entities):
@@ -433,7 +436,8 @@ def my_follows(request):
 		return render_to_response('scrapers/home.html',{'page':'my_follows', 'artists':artists, 'labels':labels, }, context_instance=RequestContext(request))
 
 	else:
-		return HttpResponse("You need to be logged in to see followed artists and labels")
+		# return HttpResponse("You need to be logged in to see followed artists and labels")
+		return render_to_response('scrapers/message.html', {'message': "You need to be logged in to see followed artists and labels" }, context_instance=RequestContext(request))
 
 def my_sounds(request):
 	if request.user.is_authenticated():
@@ -480,7 +484,8 @@ def my_sounds(request):
 		return render_to_response('scrapers/home.html',{'page':'my_sounds', 'sounds':sounds, 'releases':albums}, context_instance=RequestContext(request))
 
 	else:
-		return HttpResponse("You need to be logged in to see followed artists and labels")
+		# return HttpResponse("You need to be logged in to see followed artists and labels")
+		return render_to_response('scrapers/message.html', {'message': "You need to be logged in to your saved sounds" }, context_instance=RequestContext(request))
 
 def artist_by_name(request, artist):
 	artist = urllib.quote(artist)
@@ -770,8 +775,8 @@ def artist_search_view(request):
 
 
 def import_artists(request):
-	return render_to_response('scrapers/home.html',{'page':'advanced_search'},context_instance=RequestContext(request))
-
+	# return render_to_response('scrapers/home.html',{'page':'advanced_search'},context_instance=RequestContext(request))
+	return render_to_response('scrapers/import_artists.html', context_instance=RequestContext(request))
 
 def playlist_view(request, playlist_id):
 	playlist = User_playlist.objects.get(pk =playlist_id)
@@ -820,8 +825,9 @@ def playlist_view(request, playlist_id):
 	if albums or tracks:
 		return render_to_response('scrapers/home.html',{'page':'playlist', 'releases':albums, 'sounds':tracks, 'playlist':this_playlist},context_instance=RequestContext(request))
 	else:
-		return HttpResponse("This is an empty playlist, add search to add albums and songs! Playlist #"+str(playlist_id))
-
+		# return HttpResponse("This is an empty playlist, search to add albums and songs! Playlist #"+str(playlist_id))
+		message = "This is an empty playlist, search to add albums and songs!"
+		return render_to_response('scrapers/message.html', {'message':message }, context_instance=RequestContext(request))
 
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
@@ -848,9 +854,12 @@ def create_playlist(request):
 		else:
 			form = PlaylistForm() # An unbound form
 
-		return render_to_response('scrapers/home.html', {'page':"create_playlist", 'form': form}, context_instance=RequestContext(request))
+		# return render_to_response('scrapers/home.html', {'page':"create_playlist", 'form': form}, context_instance=RequestContext(request))
+		return render_to_response('scrapers/create_playlist.html', {'page':"create_playlist", 'form': form}, context_instance=RequestContext(request))
 	else:
-		return HttpResponse("You need to be logged in to make playlists")
+		# return HttpResponse("You need to be logged in to make playlists")
+		message = "You need to be logged in to make playlists"
+		return render_to_response('scrapers/message.html', {'message':message }, context_instance=RequestContext(request))
 
 from django.forms import ModelForm
 class PlaylistForm(ModelForm):
@@ -938,7 +947,8 @@ def my_playlists(request):
 
 		return render_to_response('scrapers/home.html', {'page':"my_playlist", 'playlists':playlists}, context_instance=RequestContext(request))
 	else:
-		return HttpResponse("You need to be logged in to have playlists")
+		# return HttpResponse("You need to be logged in to have playlists")
+		return render_to_response('scrapers/message.html', {'message': "You need to be logged in to have playlists" }, context_instance=RequestContext(request))
 
 
 def remove_user_playlist(request):
