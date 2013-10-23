@@ -23,33 +23,39 @@ lastfm_api_key = "c43db4e93f7608bb10d96fa5f69a74a1"
 
 
 #@login_required(login_url='/accounts/login/')
+# def home(request):
+# 	if request.GET:
+# 		get = request.GET.copy()
+# 		username = get['username']
+# 		artists = get_lastfm_artists(username, 100)
+# 		artist_names = []
+# 		for artist in artists:
+# 			artist_names.append(artist['name'])	
+# 		query = get_stream_query('artist', artist_names)
+
+# 		releases, rgids = get_browse_releases('stream', query)
+
+
+# 		#return HttpResponse("Username found: %s" % username )
+
+
+# 		return render_to_response('scrapers/home.html',{'page':'home', 'releases':releases}, context_instance=RequestContext(request))
+# 		#return render('scrapers/home.html',{'page':'home', 'releases':releases})
+
+
+# 		# call username API
+# 		# send to template that charts out each 
+# 	else:
+# 		#return HttpResponse("No username")
+
+# 		return render_to_response('scrapers/home.html', {'page':'start'}, context_instance=RequestContext(request))
+# 		#return render_to_response('scrapers/home.html', {'page':'start'}, context_instance=RequestContext(request))
+
+# @login_required(login_url='/accounts/login/')
 def home(request):
-	if request.GET:
-		get = request.GET.copy()
-		username = get['username']
-		artists = get_lastfm_artists(username, 100)
-		artist_names = []
-		for artist in artists:
-			artist_names.append(artist['name'])	
-		query = get_stream_query('artist', artist_names)
+	# return render_to_response('scrapers/home_search.html', context_instance = RequestContext(request))
+	return render_to_response('scrapers/home_search.html', {'page':'home_search'}, context_instance=RequestContext(request))
 
-		releases, rgids = get_browse_releases('stream', query)
-
-
-		#return HttpResponse("Username found: %s" % username )
-
-
-		return render_to_response('scrapers/home.html',{'page':'home', 'releases':releases}, context_instance=RequestContext(request))
-		#return render('scrapers/home.html',{'page':'home', 'releases':releases})
-
-
-		# call username API
-		# send to template that charts out each 
-	else:
-		#return HttpResponse("No username")
-
-		return render_to_response('scrapers/home.html', {'page':'start'}, context_instance=RequestContext(request))
-		#return render_to_response('scrapers/home.html', {'page':'start'}, context_instance=RequestContext(request))
 
 
 def get_lastfm_artists(username, number):

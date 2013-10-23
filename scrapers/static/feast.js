@@ -991,7 +991,7 @@ function play(element){
                 play_embed(element);
                 }
 
-            if (type === undefined || type ==="text"){
+            if (type === undefined || type ==="text" || !type){
 
                 console.log("track is not type text")
                 artist = unescape(artist);
