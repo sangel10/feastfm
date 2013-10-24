@@ -99,7 +99,10 @@ def get_stream_query(query_type, mbids):
 			query = query + 'OR '+query_type+':"' + mbid + '" '
 
 	query += ')'
-	print query
+	try:
+		print query
+	except Exception as e:
+		print e
 	query = urllib.quote_plus(query.encode('utf8'))
 	return query 
 

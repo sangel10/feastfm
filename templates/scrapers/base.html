@@ -120,6 +120,8 @@
     /*width: fit-content; */
     /*display: inline-block;*/
     }
+/*    body { padding-top: 10%; 
+          padding-bottom:10%;}*/
     </style>
 
 
@@ -138,11 +140,28 @@
             <span class="icon-bar"></span>
           </button>
           <a class="navbar-brand" href="/">Feast.fm  <i>beta</i></a>
+
+
         </div>
         
         <div class="navbar-collapse collapse">
           <ul class="nav navbar-nav">
+            
+            <li class = "dropdown">
+            <a class = "navbar-brand dropdown-toggle" data-toggle="dropdown">
+              <span class="caret dropdown"></span>
+            </a>
+          
+            <ul class="dropdown-menu pull-right" role="menu">
+              <li><a href="/how_to">How it Works</a></li>
+              <li><a href="/about">About</a></li>
+              <li><a href="/contact">Contact</a></li>
+            </ul>
+            </li>
+
+
             <li><a href = "/stream">Stream</a></li> 
+
           </ul>
 
             {% if page != "home_search" %}
