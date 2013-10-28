@@ -1,0 +1,81 @@
+{% extends 'scrapers/base.html' %}
+
+{% block content %}
+
+
+<div class = 'container' style = "padding-top:5%">
+<h1 style = "text-align:center"> How it Works </h1>
+
+<br>	
+<br>
+
+<h2>Functionality </h2>
+<h4>
+<br>	
+<p>
+Welcome to Feast.fm,
+<br>
+<br>
+
+A search will return a list of artists, labels, albums, and tracks matching your search. 
+
+<br><br>
+
+Albums and tracks are playable on the page. If you click on an artist or a label you will be directed to a page showing their entire discography. When you play a track the player will attempt to find the track on hosts such as YouTube and SoundCloud. As you find albums and tracks you like you can <a > <span class="glyphicon glyphicon-heart "> </span></a> to add them to your collection or click <a><span title="add to playlist" class="glyphicon glyphicon-plus"></span></a> to add them to a playlist. 
+
+
+<br>
+<br>
+
+<a ><span data-reid class="glyphicon glyphicon-chevron-down"></span></a>  - Finds the album tracklist and shows it underneath the album.
+
+<br>
+<br>
+<a  title="Play album" class="btn btn-default"><span class="glyphicon glyphicon-play"></span></a> - Gets the album tracklist and plays the first track
+<br>
+<br>
+
+
+<a><span class="glyphicon glyphicon-play"></span></a>  - Plays an individual track.
+
+<br>
+<br>
+<a > <span class="glyphicon glyphicon-heart "> </span></a> -  Saves a track or album to your collection. You can see saved tracks and albums by clicking on "My Music" and then "Songs/Albums" on the top of the page. 
+
+<br><br>
+
+<a><span title="add to playlist" class="glyphicon glyphicon-plus"></span></a>
+- Shows a list of playlists to which you can add a track or album, also gives you the option of creating a new playlist.  
+Simply click the <button type = "button" class ="btn btn-default">Add
+</button> button next to the playlist you want the song or album to go into. You can see your playlists by clicking "My Music" > "Playlists" at the top of the page. 
+
+
+<br>
+<br>
+
+Follow artists and labels by clicking on the 
+
+<button type = "button" class ="btn btn-default">Follow
+</button>
+
+button next to their names. 
+
+
+Artists and labels that you are already following will have a <button type = "button" class ="btn btn-default">Following
+</button> button next to their names.
+
+You can see a list of artists and labels that you follow in "My Music" > "Artist/Labels/Sites". 
+
+<br><br>
+<a href = "/stream">Stream </a> - shows new releases by artists and labels that you follow. You can get to your stream by following the link at the top of the page.
+
+
+
+<br><br>
+		
+</h4>
+
+</div>
+
+
+{% endblock %}

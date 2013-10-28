@@ -153,7 +153,7 @@
             </a>
           
             <ul class="dropdown-menu pull-right" role="menu">
-              <li><a href="/how_to">How it Works</a></li>
+              <li><a href="/how">How it Works</a></li>
               <li><a href="/about">About</a></li>
               <li><a href="/contact">Contact</a></li>
             </ul>
@@ -176,7 +176,7 @@
           <ul class="nav navbar-nav navbar-right">
             <!-- <li><a href = "#" id = "now-playing">Artist-Title</a></li> -->
             <li><a href = "#current-track" id = "now-playing" style="text-overflow:ellipsis;
-            overflow:hidden; max-width:320px; 
+            overflow:hidden; max-width:300px; 
               white-space: nowrap">  </a></li>
             <li><a>
                 <span class="glyphicon glyphicon-backward" id = "play-previous">
@@ -199,7 +199,14 @@
 
 
             <li class="dropdown">
-              <a href="#" class="dropdown-toggle" data-toggle="dropdown">Profile <b class="caret"></b></a>
+              <a href="#" class="dropdown-toggle" data-toggle="dropdown">
+                {% if user.is_authenticated %}
+                {{ user.username }}
+                {% else %}
+                Profile 
+                {% endif %}
+
+                <b class="caret"></b></a>
               <ul class="dropdown-menu">
                 <li><a href = '/accounts/login'>Login</a></li>
                 <li><a href = '/accounts/logout'>Logout</a></li>

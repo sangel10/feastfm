@@ -442,7 +442,10 @@ def my_follows(request):
 			labels.append({'name':label.name, 'label_id':label.mbid})
 		labels = check_if_follows(request, 'labels', labels)
 
-		return render_to_response('scrapers/home.html',{'page':'my_follows', 'artists':artists, 'labels':labels, }, context_instance=RequestContext(request))
+		if artists or labels:
+			return render_to_response('scrapers/home.html',{'page':'my_follows', 'artists':artists, 'labels':labels, }, context_instance=RequestContext(request))
+		else:
+			return render_to_response('scrapers/message.html', {'message': "You haven't followed anyone yet" }, context_instance=RequestContext(request))
 
 	else:
 		# return HttpResponse("You need to be logged in to see followed artists and labels")
@@ -490,8 +493,11 @@ def my_sounds(request):
 		# 	labels.append({'name':label.name, 'label_id':label.mbid})
 		# labels = check_if_follows(request, 'labels', labels)
 
-		return render_to_response('scrapers/home.html',{'page':'my_sounds', 'sounds':sounds, 'releases':albums}, context_instance=RequestContext(request))
-
+		if sounds or albums:
+			return render_to_response('scrapers/home.html',{'page':'my_sounds', 'sounds':sounds, 'releases':albums}, context_instance=RequestContext(request))
+		else:
+			return render_to_response('scrapers/message.html', {'message': "You haven't saved any songs or releases yet" }, context_instance=RequestContext(request))
+		
 	else:
 		# return HttpResponse("You need to be logged in to see followed artists and labels")
 		return render_to_response('scrapers/message.html', {'message': "You need to be logged in to your saved sounds" }, context_instance=RequestContext(request))

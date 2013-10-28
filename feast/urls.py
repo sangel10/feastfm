@@ -1,6 +1,7 @@
 from django.conf.urls import patterns, include, url
 from registration.backends.simple.views import RegistrationView
 from scrapers.views import CustomRegistrationView
+from django.views.generic.simple import direct_to_template
 
 # Uncomment the next two lines to enable the admin:
 # from django.contrib import admin
@@ -36,7 +37,9 @@ urlpatterns = patterns('',
     url(r'^playlist/(?P<playlist_id>[^/]+)/$', 'scrapers.views.playlist_view'),
     url(r'^source/(?P<source_id>[^/]+)/$', 'scrapers.views.songs_by_source'),
     url(r'^delete_entry/$', 'scrapers.views.delete_playlist_entry'),
-
+    url(r'^how/$', direct_to_template, {'template': 'scrapers/how_it_works.html'}),
+    url(r'^about/$', direct_to_template, {'template': 'scrapers/about.html'}),
+    url(r'^contact/$', direct_to_template, {'template': 'scrapers/contact.html'}),
 
 
     #url(r'^login/$', 'django.contrib.auth.views.login'),
