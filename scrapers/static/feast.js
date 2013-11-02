@@ -143,7 +143,7 @@ $('.follow-artist').click(function(e){
         url: "/follow_toggle/",
         data: data ,
         success: function(){
-            //alert("it worked");
+            // alert("it worked");
             console.log( button);
             if ($(button).text() != "Following"){
                 $(button).text("Following");

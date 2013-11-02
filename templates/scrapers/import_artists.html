@@ -7,7 +7,7 @@
 <h4>
 
         <form action="/lastfm_search" method="get">
-        {% csrf_token %}
+        <!-- {% csrf_token %} -->
         Import artists from Last.FM: <input type="text" id = "username" name = "username" placeholder = "username">
         <input type="submit" value="search" />
         </form>
@@ -15,7 +15,7 @@
         <br>
 
         <form action="/soundcloud_search" method="get">
-        {% csrf_token %}
+        <!-- {% csrf_token %} -->
 
         Search for: 
         <select id="query-type" name= 'query-type'>

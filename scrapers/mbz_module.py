@@ -3,6 +3,7 @@ import urllib
 import urllib2
 import json
 import musicbrainzngs as mbz
+# from scrapers.db_handler import check_if_follows
 
 mbz.set_useragent("feast", "0.0.0", "santiagoangel10@gmail.com")
 
@@ -14,6 +15,8 @@ def urlToJson(url):
 	data = urllib2.urlopen(url)
 	api_results = json.load(data)
 	return api_results
+
+
 
 def getLabelReleases(mbid, rgids=None):
 	if rgids == None:
@@ -75,22 +78,10 @@ def getRecordingByID(mbid):
 	return recording 
 
 
-def searchArtists(query, limit =5):
-	artists = []
-	api_results = mbz_search(query, 'artist', limit=10)
-	print "results search sees: "
-	print api_results
-	artists = []
-	for entry in api_results['artist']:
-		if len(artists) < limit:
-			# if entry["id"] not in mbids:
-			# 	mbids.append(entry["id"])
-			if "disambiguation" in entry:
-				disambiguation = entry['disambiguation']
-			else:
-				disambiguation = ""
-			artists.append({'name':entry['name'], 'artist_id':entry['id'], 'disambiguation':disambiguation})
-	return artists
+
+
+
+
 
 
 def get_browse_releases(query_type, mbid_or_query, rgids = None):
@@ -172,9 +163,6 @@ def parse_releases(api_results, rgids):
 
 
 
-
-
-
 def mbz_search(query, query_type, limit =100):
 	url = "http://musicbrainz.org/ws/2/"+query_type+"/?query="+query+"&fmt=json&limit="+str(limit)
 	print "QUERY URL: " + url
@@ -217,7 +205,7 @@ def getTracklistByReid(reid):
 
 
 
-# /*
+# The following are notes from Omid on different systems of advancing the way the MBZ data is retrieved/*
 #   MusicBrainzArtist : Hash { name : String, id -> Integer}
 
 # */

@@ -76,6 +76,7 @@
                     </div>
                     <br>
                     <em>{{release.title}}</em>
+                    {% if release.primary_type%}
                      <span class = "release-type">[{{release.primary_type}}] 
                         {% if release.secondary_types %}
                         {% for s_type in release.secondary_types %} 
@@ -83,12 +84,15 @@
                         {% endfor %}
                         {% endif %} 
                     </span>
+                    {% endif %}
 
                   </h3>
+                  {% if release.label %}
                   <h4><a class = "label-link" href = "/label/{{ release.label_id|escape }}" >{{release.label}}</a><button type = "button" class = "btn btn-default follow-label" data-label-id = "{{ release.label_id }}" data-label-name = "{{ release.label }}">{{release.following_label}}</button></h4>
                   <h5 class = "catalog-number">{{release.cat_num}}</h5>
                   <h5 class = "date">{{release.date}}</h5>
                   <h4>
+                    {%endif %}
                   <ul type ="none" class = "album-tracks">
 
                   </h4>
@@ -173,9 +177,18 @@
                 {%endif%}
 
                 <span >
-                    <button type="button" data-artist-id = "{{ artist.artist_id }}" class ="follow-artist">
+                    <!-- <button type="button" 
+                    data-artist-id = "{{ artist.artist_id }}" 
+                    class ="follow-artist">
                         {{artist.following_artist}}
-                    </button>
+                    </button> -->
+
+                    <button type = "button" 
+                    class = "btn btn-default follow-artist" 
+                    data-artist-id = "{{ artist.artist_id }}" 
+                    data-following-artist = "{{artist.following_artist}}">
+                    {{artist.following_artist}}
+                </button>
                 </span>
             </div>
             </li>
