@@ -8,6 +8,8 @@
 <div class = "row">
     <div class="container col-md-8 scrollable music"> <!-- col-md-offset-0 -->
 
+        {% block music_content %}
+
 
         {% if releases %}
 
@@ -216,10 +218,6 @@
 
         {% endif %}
 
-    {% if page == 'my_playlist' %}
-    <h2><a href = "/create_playlist" > CREATE PLAYLIST</a></h2>
-
-    {% endif %}
 
 
 
@@ -239,12 +237,14 @@
         {% endfor %}
 
     {% endif%} -->
-
+    {% endblock music_content %}
     <br>
     <br>
     <br>
 
+    
     </div>
+
 
     <div class="container col-md-4 scrollable">
         <div id="player">

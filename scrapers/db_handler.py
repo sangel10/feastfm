@@ -88,7 +88,6 @@ def get_or_create_release(title = '', artist_name = '', reid=''):
 	
 
 
-
 def follow_toggle(request):
 	if request.user.is_authenticated():
 		user = request.user
@@ -142,7 +141,8 @@ def follow_toggle(request):
 			print track_id
 			track = get_or_create_recording(title = title, artist_name = artist_name, mbid = track_id)
 
-			if user_profile.sounds.filter(mbid = track_id).exists():
+			# if user_profile.sounds.filter(mbid = track_id).exists():
+			if track in user_profile.sounds.all():
 				user_profile.sounds.remove(track)
 				user_profile.save()
 				print "unfollowed sound"
@@ -159,7 +159,8 @@ def follow_toggle(request):
 			title = post['title']
 			release = get_or_create_release(title = title, artist_name = artist_name, reid = reid)
 
-			if user_profile.albums.filter(reid = reid).exists():
+			if release in user_profile.albums.all():
+			# if user_profile.albums.filter(reid = reid).exists():
 				user_profile.albums.remove(release)
 				user_profile.save()
 				print "unfollowed album"
@@ -439,7 +440,10 @@ def add_track_to_playlist(request):
 		if request.method == 'POST':
 			post = request.POST.copy()
 			title = post['title']
-			mbid = post['mbid']
+			try:
+				mbid = post['mbid']
+			except:
+				mbid = ""
 			artist_name = post['artist_name']
 			sound = get_or_create_recording(title = title, artist_name = artist_name, mbid = mbid)
 			playlist_id = post['playlist_id']
@@ -451,6 +455,45 @@ def add_track_to_playlist(request):
 		return HttpResponse('success')
 	else:
 		return HttpResponse("You need to be logged in to make playlists",  status=401)
+
+
+def check_track_ajax(request):
+
+	track = request.GET['track']
+	sounds = [track]
+	check_if_follow(request, 'sounds', sounds)
+
+
+	# if request.user.is_authenticated():
+	print "album_tracks lastfm was just called"
+	get = request.GET.copy()
+	print get
+	# reid = get["reid"]
+	artist = get["artist"]
+	title = get["title"]
+
+	tracks = lastfmAlbumTracklist(artist, title)
+	tracks = check_if_follows(request,'sounds', tracks)
+
+	print "this are the tracks from get album tracks from lastfm"
+	print tracks
+	results = {'tracks':tracks}
+	#results = {"reid":reid, 'tracks':tracks}
+	return_json = simplejson.dumps(results)
+	return HttpResponse(return_json, mimetype='application/json')
+		#return HttpResponse("album page!!!")
+	# else:
+	# 	return HttpResponse('You must be logged in to do this', status=401)
+
+
+item = {'title':title, 'artist':artist}
+
+
+
+
+
+
+
 
 
 

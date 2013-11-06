@@ -452,7 +452,7 @@ def artist_search_view(request):
 		get = request.GET.copy()
 		query = get['query']
 		query = urllib.quote_plus(query.encode('utf8'))
-		artists = searchArtists(query)
+		artists = searchArtists(request, query)
 		return render_to_response('scrapers/home.html',{'page':'artist_search', 'artists':artists},context_instance=RequestContext(request))
 	else:
 		return render_to_response('scrapers/home.html', {'page':'search'}, context_instance=RequestContext(request))

@@ -249,12 +249,12 @@ $(document).on('click', ".add-track", function(e) {
 
 //close popovers on outside click
 $(document).on("click", function (e) {
-    console.log("clicked document")
+    // console.log("clicked document")
     var $target = $(e.target),
         isPopover = $(e.target).is('.popover'),
         inPopover = $(e.target).closest('.popover').length > 0
         var $popover = $('.popover');
-        console.log("")
+        // console.log("")
 
     //hide only if clicked on button or inside popover
     if (!isPopover && !inPopover) {
@@ -525,8 +525,14 @@ $(document).on('click', ".love-track", function(e) {
     // console.log($target);
     // console.log($target_parent);
     var track_id = $($track).data('track-id');
+    if (!track_id || typeof track_id !== 'undefined' || attr !== false) {
+        track_id = ""
+    }
     var artist = $($track).data('artist');
     var artist_id = $($track).data('artist-id');
+    if (!artist_id || typeof artist_id !== 'undefined' || attr !== false) {
+        artist_id = ""
+    }
     var title = $($track).data('title');
     // console.log(label_id)
     //var artist_name = $($target_parent).data('artist');
@@ -684,8 +690,13 @@ function create_album_track(artist, title, track_id, following, artist_id){
     $($play_a).append($play_span);
     $($li).append($play_a);
 
-
-    var $artist_a = $("<a>", {href:"/artist/"+artist_id})
+    if (artist_id){
+        var $artist_a = $("<a>", {href:"/artist/"+artist_id})
+    }
+    
+    else {
+        var $artist_a = $("<a>", {href:"/artist_search/?query="+htmlEncode(artist)})
+    }  
     $artist_a.text(artist)
     $($li).append($artist_a)
     // console.log($artist_a)
@@ -906,6 +917,86 @@ function hacked_album_art(){
 loadArt();
 
 
+
+
+
+$(document).on('click', "#submit-text-tracks", function(e){
+        console.log("submit text-tracks clicked")
+        var tracks = $("#text-tracks").val()
+        console.log(tracks)
+
+        var $ul = $("ul.tracks")
+        text_to_tracks(tracks, $ul)
+    })
+
+
+function text_to_tracks(text, destination){
+    var lines = text.split('\n')
+    console.log("lines: ",lines)
+    destination.empty   ()
+    for (i=0; i<lines.length; i++){
+        var line = lines[i]
+        // line = line.replace( /[\u2012|\u2013|\u2014|\u2015]/, '-' )
+
+        if (line.indexOf(" - ") >=0 ){
+            var split_var = " - "
+        }
+        else if (line.indexOf("-") >=0){
+            var split_var = "-"
+        }
+        // else{
+        //     var split_var = undefined
+        // }
+        if (split_var){
+            console.log("split var: ", split_var)
+            var split_line = line.split(split_var)
+            var artist = split_line[0]
+            var track_title = line.replace(artist+split_var, "")
+            console.log("Artist: ",artist," track_title: ", track_title)
+           // $li = create_album_track(artist, track_title, var track_id = "", var following= "", var artist_id= "")
+            if (artist && track_title){
+
+
+
+            track = {'artist':artist, 'title':title};
+            console.log(track)
+            $.ajax({
+                type: "POST",
+                url: "/check_track_love/",
+                data: track,
+            })
+            .done(function(data){
+               console.log("checked if track followed", data)
+            })
+
+
+
+                var $li = create_album_track(artist, track_title)
+                console.log($li)
+                destination.append($li)
+            }
+            
+        }
+        else{
+            console.log(" no  ' - ' or  '-' found")
+            continue
+        }
+        
+    }
+}
+    
+
+
+
+
+
+
+
+
+
+
+
+
 function getNextElement(currElement, className){
     var elements = $('.' + className);
     var currentIndex = elements.index(currElement);
@@ -973,13 +1064,14 @@ function play(element){
 
 
 
-
-        if (title === null || artist === null){
-
+        var artist = $(element).data('artist');
+        var title = $(element).data('title');
+        if (title === null || artist === null || !title || !artist){
+            console.log("missing artist or title")
         }
         else{
-            var artist = $(element).data('artist');
-            var title = $(element).data('title');
+            // var artist = $(element).data('artist');
+            // var title = $(element).data('title');
 
             $("#now-playing").text(artist +" - "+title);
 

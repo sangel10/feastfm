@@ -1,6 +1,11 @@
 import urllib2
 import json
 
+
+sc_client_id = 'a0b4638bae6d50a9296f7fc3f35442eb'
+lastfm_api_key = "c43db4e93f7608bb10d96fa5f69a74a1"
+
+
 def get_lastfm_artists(username, number):
 		
 		limit = number
