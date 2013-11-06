@@ -538,6 +538,9 @@ def create_playlist(request):
 		message = "You need to be logged in to make playlists"
 		return render_to_response('scrapers/message.html', {'message':message }, context_instance=RequestContext(request))
 
+
+
+
 from django.forms import ModelForm
 class PlaylistForm(ModelForm):
     class Meta:

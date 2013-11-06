@@ -933,7 +933,8 @@ $(document).on('click', "#submit-text-tracks", function(e){
 function text_to_tracks(text, destination){
     var lines = text.split('\n')
     console.log("lines: ",lines)
-    destination.empty   ()
+    destination.empty()
+    var tracks = []
     for (i=0; i<lines.length; i++){
         var line = lines[i]
         // line = line.replace( /[\u2012|\u2013|\u2014|\u2015]/, '-' )
@@ -955,34 +956,34 @@ function text_to_tracks(text, destination){
             console.log("Artist: ",artist," track_title: ", track_title)
            // $li = create_album_track(artist, track_title, var track_id = "", var following= "", var artist_id= "")
             if (artist && track_title){
-
-
-
-            track = {'artist':artist, 'title':title};
-            console.log(track)
-            $.ajax({
-                type: "POST",
-                url: "/check_track_love/",
-                data: track,
-            })
-            .done(function(data){
-               console.log("checked if track followed", data)
-            })
-
-
-
-                var $li = create_album_track(artist, track_title)
-                console.log($li)
-                destination.append($li)
-            }
-            
+                var track = {'artist':artist, "title":track_title}
+                tracks.push(track)
+            } 
         }
         else{
             console.log(" no  ' - ' or  '-' found")
             continue
         }
-        
+
     }
+
+
+    console.log(tracks)
+    var data = JSON.stringify(tracks)
+    $.ajax({
+        type: "POST",
+        url: "/check_track_love/",
+        data: {'tracks':data},
+    })
+    .done(function(data){
+       console.log("checked if track followed, data: ", data)
+       var sounds  = data['sounds']
+       for (j=0; j<sounds.length; j++){
+        var $li = create_album_track(sounds[j]['artist'], sounds[j]['title'], "", sounds[j]['following_sound'])
+        console.log($li)
+        destination.append($li)
+       }
+    })   
 }
     
 

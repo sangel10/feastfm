@@ -41,7 +41,7 @@ urlpatterns = patterns('',
     url(r'^contact/$', direct_to_template, {'template': 'scrapers/contact.html'}),
     url(r'^advanced_search/$', direct_to_template, {'template': 'scrapers/import_artists.html'}),
     url(r'^text_to_tracks/$', direct_to_template, {'template': 'scrapers/text_to_tracks.html'}),
-    url(r'^check_track_love/$', 'scrapers.check_track_ajax'),
+    url(r'^check_track_love/$', 'scrapers.views.check_track_ajax'),
 
     #url(r'^login/$', 'django.contrib.auth.views.login'),
     #url(r'^accounts/', include('registration.urls')),

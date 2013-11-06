@@ -457,36 +457,22 @@ def add_track_to_playlist(request):
 		return HttpResponse("You need to be logged in to make playlists",  status=401)
 
 
+import json
+
 def check_track_ajax(request):
+	if request.POST:
+		sounds = request.POST['tracks']
+		sounds = json.loads(sounds)
+		# sounds = [track]
+		print "check_track_ajax tracks:", sounds, type(sounds)
+		sounds = check_if_follows(request, 'sounds', sounds)
 
-	track = request.GET['track']
-	sounds = [track]
-	check_if_follow(request, 'sounds', sounds)
-
-
-	# if request.user.is_authenticated():
-	print "album_tracks lastfm was just called"
-	get = request.GET.copy()
-	print get
-	# reid = get["reid"]
-	artist = get["artist"]
-	title = get["title"]
-
-	tracks = lastfmAlbumTracklist(artist, title)
-	tracks = check_if_follows(request,'sounds', tracks)
-
-	print "this are the tracks from get album tracks from lastfm"
-	print tracks
-	results = {'tracks':tracks}
-	#results = {"reid":reid, 'tracks':tracks}
-	return_json = simplejson.dumps(results)
-	return HttpResponse(return_json, mimetype='application/json')
-		#return HttpResponse("album page!!!")
-	# else:
-	# 	return HttpResponse('You must be logged in to do this', status=401)
-
-
-item = {'title':title, 'artist':artist}
+		results = {'sounds':sounds}
+		#results = {"reid":reid, 'tracks':tracks}
+		return_json = simplejson.dumps(results)
+		return HttpResponse(return_json, mimetype='application/json')
+	else:
+		return HttpResponse("No POST data received",  status=400)
 
 
 
