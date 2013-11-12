@@ -231,7 +231,8 @@ $('.love-album').click(function(e){
 })
 
 // for albums
-$(".add-album").click(function(e){
+$(document).on('click', ".add-album", function(e) {
+// $(".add-album").click(function(e){
     addPopover(e, 'album-to-playlist')
     e.stopPropagation();
 })
@@ -562,15 +563,17 @@ var currentTrack;
 
 
 
-
-$('.play-entire-album').click(function(e){
+$(document).on('click', ".play-entire-album", function(e) {
+// $('.play-entire-album').click(function(e){
     expand_album(e, true) 
 })
 
 
 
 //expand album
-$('.expand-album').click(function(e){
+$(document).on('click', ".expand-album", function(e) {
+// $('.expand-album').click(function(e){
+    console.log('album expanded')
     expand_album(e, false)
 });
 
@@ -937,7 +940,7 @@ function text_to_tracks(text, destination){
     var tracks = []
     for (i=0; i<lines.length; i++){
         var line = lines[i]
-        // line = line.replace( /[\u2012|\u2013|\u2014|\u2015]/, '-' )
+        line = line.replace( /[\u2012|\u2013|\u2014|\u2015]/, '-' )
 
         if (line.indexOf(" - ") >=0 ){
             var split_var = " - "
@@ -967,7 +970,6 @@ function text_to_tracks(text, destination){
 
     }
 
-
     console.log(tracks)
     var data = JSON.stringify(tracks)
     $.ajax({
@@ -985,10 +987,106 @@ function text_to_tracks(text, destination){
        }
     })   
 }
-    
+
+
+$(document).on('click', "#submit-text-albums", function(e){
+        console.log("submit text-albums clicked")
+        var tracks = $("#text-tracks").val()
+        console.log(tracks)
+
+        var $ul = $("ul.tracks")
+        text_to_albums(tracks, $ul)
+    })
 
 
 
+function text_to_albums(text, destination){
+    var lines = text.split('\n')
+
+    console.log("lines: ",lines)
+    destination.empty()
+    var tracks = []
+    for (i=0; i<lines.length; i++){
+        var line = lines[i]
+        line = line.replace( /[\u2012|\u2013|\u2014|\u2015]/, '-' )
+
+        if (line.indexOf(" - ") >=0 ){
+            var split_var = " - "
+        }
+        else if (line.indexOf("-") >=0){
+            var split_var = "-"
+        }
+        // else{
+        //     var split_var = undefined
+        // }
+        if (split_var){
+            console.log("split var: ", split_var)
+            var split_line = line.split(split_var)
+            var artist = split_line[0]
+            var title = line.replace(artist+split_var, "")
+            console.log("Artist: ",artist," track_title: ", title)
+           // $li = create_album_track(artist, track_title, var track_id = "", var following= "", var artist_id= "")
+            if (artist && title){
+                var track = {'artist':artist, "title":title}
+                tracks.push(track)
+            } 
+        }
+        else{
+            console.log(" no  ' - ' or  '-' found")
+            continue
+        }
+
+    }
+
+       var sounds  = tracks
+       for (j=0; j<sounds.length; j++){
+        var $li = create_album(sounds[j]['artist'], sounds[j]['title'])
+        console.log($li)
+        destination.append($li)
+       }
+}
+
+function create_album(artist, title){
+    var release_li = '<li class = "release" style="list-style-type: none;">\
+    <div class="media album stream-item release" \
+    data-artist = "'+artist+'"\
+    data-album-title = "'+title+'"\
+    >\
+        <a class="pull-left" href="#">\
+          <img width = "100" height = "100" class="media-object" src="http://ws.audioscrobbler.com/2.0/?method=album.imageredirect&amp;artist='+htmlEncode(artist)+'&amp;album='+htmlEncode(title)+'&amp;autocorrect=1&amp;size=largesquare&amp;api_key=c43db4e93f7608bb10d96fa5f69a74a1" alt="...">\
+        </a>\
+        \
+        <div class="media-body">\
+          <h3 class="media-heading">\
+         \
+        \
+            <a href = "/artist_search/?query='+htmlEncode(artist)+'">\
+            \
+            <strong>'+artist+'</strong>  </a> \
+            \
+            <div class = "pull-right" >\
+            <span class = "expand-album" >  \
+                <a title = "Expand album" ><span  class="glyphicon glyphicon-chevron-down"></span></a>\
+            </span>\
+            \
+            <a ><span title = "add to playlist" class="glyphicon glyphicon-plus add-album"></span></a>    \
+              <a title = "Play album" class = "btn btn-default"><span class="glyphicon glyphicon-play play-entire-album"></span></a>\
+            \
+            </div>\
+            <br>\
+            <em>'+title+'</em>\
+            \
+            \
+          </h3>\
+          <ul type ="none" class = "album-tracks">\
+          \
+          </h4>\
+          </ul>\
+        </div>\
+      </div>\
+    </li>'
+    return release_li;
+}
 
 
 

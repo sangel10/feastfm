@@ -3,16 +3,17 @@
 
 
 {% block music_content %}
-<div style = "padding-top:15%; text-align:center; width = 100%; height:100% ">
+<div style = " text-align:center; width = 100%; height:100% ">
 
-<h3>Search for entire tracklists</h3>
-<h4>Enter tracks separated by line and formatted as: artist - track</h4>
+<h3>Search for entire lists of tracks or albums at once</h3>
+<h4>Enter tracks or albums separated by line and formatted as: artist - title</h4>
 <!-- <form action = "#" id="usrform"> -->
   <textarea style = "width:100%; height:60%; " name="list_of_tracks" id= "text-tracks" placeholder = ""></textarea>
 	
 	<div>
 		<br>
-  <button type="button" id = "submit-text-tracks" > Submit </button>
+  <button type="button" id = "submit-text-tracks" > Convert to Tracks</button>
+  <button type="button" id = "submit-text-albums" > Convert to Albums</button>
 
 <!-- </form> -->
 

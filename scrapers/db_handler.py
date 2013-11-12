@@ -2,7 +2,6 @@
 from django.http import HttpResponse
 from django.shortcuts import render_to_response
 from django.template import RequestContext
-import datetime
 from scrapers.models import *
 from scrapers.mbz_module import *
 
@@ -410,6 +409,25 @@ def get_album_tracks_lastfm(request):
 		#return HttpResponse("album page!!!")
 	# else:
 	# 	return HttpResponse('You must be logged in to do this', status=401)
+
+lastfm_api_key = "c43db4e93f7608bb10d96fa5f69a74a1"
+
+def lastfmAlbumTracklist(artist, title):
+	artist = urllib.quote_plus(artist)
+	title = urllib.quote_plus(title)
+
+	url = "http://ws.audioscrobbler.com/2.0/?method=album.getinfo&api_key=c43db4e93f7608bb10d96fa5f69a74a1&artist="+artist+"&album="+title+"&autocomplete=1&format=json"
+	print "This is the get album tracks URL " + url
+	data = urllib2.urlopen(url)
+	api_results = json.load(data)
+	tracks = []
+	for track in api_results['album']['tracks']['track']:
+		artist = track['artist']['name']
+		title = track['name']
+		track_id = track['mbid']
+		tracks.append({'artist':artist, 'title':title, 'track_id':track_id})
+	# results = {'reid':reid, 'tracks':tracks}
+	return tracks
 
 
 

@@ -3,7 +3,7 @@ from django.shortcuts import render_to_response
 import urllib2
 import json
 import urllib
-import datetime
+# import datetime
 from django.template import RequestContext
 import simplejson
 
@@ -45,8 +45,10 @@ def home(request):
 
 
 def get_stream_query(query_type, mbids):
+	import datetime
 	# query_type = 'artist'
 	today = datetime.date.today()
+	# today = datetime.today().date()
 	last_month = today - datetime.timedelta(days=30)
 	end_date = today.strftime('%Y-%m-%d')
 	start_date = last_month.strftime('%Y-%m-%d')
@@ -257,7 +259,11 @@ def my_sounds(request):
 			else:
 				artist = ""
 				artist_id = ""
-			albums.append({'title': album.title, 'artist':artist, 'artist_id':artist_id,})
+			if album.reid:
+				reid = album.reid
+			else:
+				reid = ""
+			albums.append({'title': album.title, 'artist':artist, 'artist_id':artist_id, 'reid':reid})
 		albums = check_if_follows(request, 'albums', albums)
 		albums = check_if_follows(request, 'artists', albums)
 		print "these are the my_follows albums: "
