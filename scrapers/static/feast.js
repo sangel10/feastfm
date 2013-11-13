@@ -954,14 +954,16 @@ function text_to_tracks(text, destination){
         if (split_var){
             console.log("split var: ", split_var)
             var split_line = line.split(split_var)
+            if (split_line.length >1){
             var artist = split_line[0]
             var track_title = line.replace(artist+split_var, "")
             console.log("Artist: ",artist," track_title: ", track_title)
            // $li = create_album_track(artist, track_title, var track_id = "", var following= "", var artist_id= "")
-            if (artist && track_title){
-                var track = {'artist':artist, "title":track_title}
-                tracks.push(track)
-            } 
+                if (artist && track_title){
+                    var track = {'artist':artist, "title":track_title}
+                    tracks.push(track)
+                }
+            }
         }
         else{
             console.log(" no  ' - ' or  '-' found")
@@ -1010,26 +1012,33 @@ function text_to_albums(text, destination){
         var line = lines[i]
         line = line.replace( /[\u2012|\u2013|\u2014|\u2015]/, '-' )
 
-        if (line.indexOf(" - ") >=0 ){
+        if (line.indexOf(" - ") !== -1 ){
             var split_var = " - "
+            console.log("indexOf split_var ", line.indexOf(" - "))
         }
-        else if (line.indexOf("-") >=0){
+        else if (line.indexOf("-") !== -1){
             var split_var = "-"
+            console.log("indexOf split_var ", line.indexOf("-"))
         }
         // else{
         //     var split_var = undefined
         // }
         if (split_var){
+            console.log("indexOf split_var in if split_bar: ", line.indexOf(split_var))
             console.log("split var: ", split_var)
             var split_line = line.split(split_var)
-            var artist = split_line[0]
-            var title = line.replace(artist+split_var, "")
-            console.log("Artist: ",artist," track_title: ", title)
-           // $li = create_album_track(artist, track_title, var track_id = "", var following= "", var artist_id= "")
-            if (artist && title){
-                var track = {'artist':artist, "title":title}
+            console.log("split line length", split_line.length)
+            if (split_line.length >1){
+                var artist = split_line[0]
+                var title = line.replace(artist+split_var, "")
+                console.log("Artist: ",artist," track_title: ", title)
+               // $li = create_album_track(artist, track_title, var track_id = "", var following= "", var artist_id= "")
+                // if (artist && title){
+                    var track = {'artist':artist, "title":title}
                 tracks.push(track)
-            } 
+            // } 
+            }
+            
         }
         else{
             console.log(" no  ' - ' or  '-' found")
@@ -1041,7 +1050,7 @@ function text_to_albums(text, destination){
        var sounds  = tracks
        for (j=0; j<sounds.length; j++){
         var $li = create_album(sounds[j]['artist'], sounds[j]['title'])
-        console.log($li)
+        // console.log($li)
         destination.append($li)
        }
 }

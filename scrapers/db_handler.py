@@ -396,16 +396,18 @@ def get_album_tracks_lastfm(request):
 	# reid = get["reid"]
 	artist = get["artist"]
 	title = get["title"]
+	try:
+		tracks = lastfmAlbumTracklist(artist, title)
+		tracks = check_if_follows(request,'sounds', tracks)
 
-	tracks = lastfmAlbumTracklist(artist, title)
-	tracks = check_if_follows(request,'sounds', tracks)
-
-	print "this are the tracks from get album tracks from lastfm"
-	print tracks
-	results = {'tracks':tracks}
-	#results = {"reid":reid, 'tracks':tracks}
-	return_json = simplejson.dumps(results)
-	return HttpResponse(return_json, mimetype='application/json')
+		print "this are the tracks from get album tracks from lastfm"
+		print tracks
+		results = {'tracks':tracks}
+		#results = {"reid":reid, 'tracks':tracks}
+		return_json = simplejson.dumps(results)
+		return HttpResponse(return_json, mimetype='application/json')
+	except:
+		return HttpResponse('Album tracklist not found, are you sure it was formatted and spelled correct?', status=404)
 		#return HttpResponse("album page!!!")
 	# else:
 	# 	return HttpResponse('You must be logged in to do this', status=401)
@@ -420,6 +422,9 @@ def lastfmAlbumTracklist(artist, title):
 	print "This is the get album tracks URL " + url
 	data = urllib2.urlopen(url)
 	api_results = json.load(data)
+	print "these is what lastfm returned: ", api_results
+
+
 	tracks = []
 	for track in api_results['album']['tracks']['track']:
 		artist = track['artist']['name']
