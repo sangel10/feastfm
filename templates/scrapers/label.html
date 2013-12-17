@@ -1,0 +1,10 @@
+<li><a href = "/label/{{label.label_id}}">  {{ label.name }}</a>
+    {%if label.disambiguation%}
+        <span>({{label.disambiguation}})</span
+    {%endif%}
+    <span >
+        <button type="button" data-label-name = "{{ label.name }}" data-label-id = "{{ label.label_id }}" class ="follow-label">
+            {{label.following_label}}
+        </button>
+    </span>
+</li>

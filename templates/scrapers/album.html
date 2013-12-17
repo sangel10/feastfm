@@ -1,0 +1,87 @@
+
+<li class = "release" style="list-style-type: none;">
+    <div class="media album stream-item release" 
+    data-artist = "{{release.artist}}"
+    data-artist-id = "{{release.artist_id}}"
+    data-album-title = "{{release.title}}"
+    data-catalog-num = "{{release.cat_num}}"
+    data-label = "{{release.label}}"
+    data-label-id = "{{ release.label_id }}"
+    data-date = "{{release.date}}"
+    data-reid = "{{release.reid}}" 
+    data-primary-type = "{{release.primary_type}}"
+
+    >
+        <a class="pull-left" href="#">
+          <img width = "100" height = "100" class="media-object" src="http://ws.audioscrobbler.com/2.0/?method=album.imageredirect&amp;artist={{release.artist|escape}}&amp;album={{release.title|escape}}&amp;autocorrect=1&amp;size=largesquare&amp;api_key=c43db4e93f7608bb10d96fa5f69a74a1" alt="...">
+        </a>
+        
+        <div class="media-body">
+          <h3 class="media-heading">
+
+            {%if release.artist_id%}
+            <a href = "/artist/{{ release.artist_id }}">
+            {% else %}
+            <!-- <a href = "/artist_name/{{ release.artist|escape }}"> -->
+            <a href = "/artist_search/?query={{ release.artist|escape }}">
+            {% endif %}
+            
+
+            <strong>{{release.artist}}</strong>  </a> <button type = "button" class = "btn btn-default follow-artist" data-artist-id = "{{ release.artist_id }}" data-following-artist = "{{release.following_artist}}">{{release.following_artist}}</button>
+            
+            <div class = "pull-right" >
+            <span class = "expand-album" >  
+                <a title = "Expand album" ><span data-reid = "{{release.reid}}" class="glyphicon glyphicon-chevron-down"></span></a>
+            </span>
+
+            {% if release.following_album %}
+                <a ><span 
+                data-reid = "{{release.reid}}" 
+                data-album-title = "{{release.title}}" 
+                data-artist = "{{release.artist}}" 
+                class="glyphicon glyphicon-heart love-album red">
+            </span></a>
+            {%else%}
+            <a ><span 
+                data-reid = "{{release.reid}}" 
+                data-album-title = "{{release.title}}" 
+                data-artist = "{{release.artist}}" 
+                class="glyphicon glyphicon-heart love-album">
+            </span></a>
+            {% endif %}
+
+
+            
+            <a ><span title = "add to playlist" class="glyphicon glyphicon-plus add-album"></span></a>    
+              <a title = "Play album" class = "btn btn-default"><span data-reid = "{{release.reid}}" class="glyphicon glyphicon-play play-entire-album"></span></a>
+            {%if page == "playlist" %}
+                <a title = "Delete album" ><span data-reid = "{{release.reid}}" data-playlist-id = {{playlist.pk}} data-entry-id = {{release.entry_id}} data-feast-id ={{release.feast_id}} class="glyphicon glyphicon-remove delete-album"></span></a>
+            {% endif %}
+
+            </div>
+            <br>
+            <em>{{release.title}}</em>
+            {% if release.primary_type%}
+             <span class = "release-type">[{{release.primary_type}}] 
+                {% if release.secondary_types %}
+                {% for s_type in release.secondary_types %} 
+                    [{{ s_type }}]  
+                {% endfor %}
+                {% endif %} 
+            </span>
+            {% endif %}
+
+          </h3>
+          {% if release.label %}
+          <h4><a class = "label-link" href = "/label/{{ release.label_id|escape }}" >{{release.label}}</a><button type = "button" class = "btn btn-default follow-label" data-label-id = "{{ release.label_id }}" data-label-name = "{{ release.label }}">{{release.following_label}}</button></h4>
+          <h5 class = "catalog-number">{{release.cat_num}}</h5>
+          <h5 class = "date">{{release.date}}</h5>
+          <h4>
+            {%endif %}
+          <ul type ="none" class = "album-tracks">
+
+          </h4>
+          </ul>
+        </div>
+      </div>
+    </li>

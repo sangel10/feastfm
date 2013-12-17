@@ -1,0 +1,42 @@
+  <!-- <h5> -->
+            <li class = " album-track track" 
+            data-artist-id = "{{sound.artist_id}}" 
+            data-artist = "{{sound.artist}}" 
+            data-title = "{{sound.title}}"
+            data-track-id = "{{sound.track_id}}" 
+            data-type = "{{sound.type}}" 
+            data-id = "{{sound.id}}"
+            > 
+                <a><span class="glyphicon glyphicon-play play-track"></span></a>
+
+                {%if sound.artist_id%}
+                    <a href = "/artist/{{ sound.artist_id }}">
+                    {% else %}
+                    <!-- <a href = "/artist_name/{{ sound.artist|escape }}"> -->
+                    <a href = "/artist_search/?query={{ sound.artist|escape }}">
+                        
+                    {% endif %}
+                <!-- <a href = "/artist_name/{{ sound.artist|urlencode }}"> -->
+
+
+                    {{sound.artist}} </a> - {{sound.title}} 
+
+                {%if page == "playlist" %}
+                    <a title = "Delete track" class = "pull-right"><span data-reid = "{{sound.track_id}}" data-playlist-id = {{playlist.pk}} data-feast-id = "{{sound.feast_id}}"
+                        data-entry-id = {{sound.entry_id}}
+                        class="glyphicon glyphicon-remove delete-track"></span></a>
+                {% endif %}
+
+                <a class="pull-right" title="Add to Playlist"><span class="glyphicon glyphicon-plus playlist-add add-track"></span></a>
+                <a class="pull-right" title="Love Track">
+
+                    {% if sound.following_sound %}
+                        <span class="glyphicon glyphicon-heart love-track red" ></span>
+                    {% else %}
+                        <span class="glyphicon glyphicon-heart love-track" ></span>
+                    {% endif %}
+                    </a>
+                   
+                
+            <!-- </h5> -->
+            </li>

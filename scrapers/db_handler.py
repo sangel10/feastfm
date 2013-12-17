@@ -442,9 +442,14 @@ def add_album_to_playlist(request):
 		user_profile, up_created = UserProfile.objects.get_or_create(user = user)
 		if request.method == 'POST':
 			post = request.POST.copy()
-			title = post['title']
-			reid = post['reid']
-			artist_name = post['artist_name']
+			if 'title' in post:
+				title = post['title']
+			if 'reid' in post:
+				reid = post['reid']
+			else:
+				reid = ""
+			if 'artist_name' in post:
+				artist_name = post['artist_name']
 			release = get_or_create_release(title = title, artist_name = artist_name, reid = reid)
 			playlist_id = post['playlist_id']
 			playlist = User_playlist.objects.get(pk =playlist_id)

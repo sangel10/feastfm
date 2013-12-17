@@ -339,8 +339,12 @@ $(document).on('click', ".track-to-playlist", function(e){
     var $target = $(e.target)
     var $playlist = $(e.target).closest(".playlist")
     var playlist_id = $($playlist).data("playlist-id")
-
     var $track = $($target).closest(".track")
+    track_to_playlist($track, playlist_id)
+
+})
+
+function track_to_playlist($track, playlist_id){
     var artist_name = $($track).data("artist")
     var artist_id = $($track).data("artist-id")
     var title = $($track).data("title")
@@ -356,7 +360,7 @@ $(document).on('click', ".track-to-playlist", function(e){
     }).done(function(){
         alert("track was added to playlist")
     })
-})
+}
 
 
 
@@ -365,9 +369,12 @@ $(document).on('click', ".album-to-playlist", function(e){
     var $target = $(e.target)
     var $playlist = $(e.target).closest(".playlist")
     var playlist_id = $($playlist).data("playlist-id")
-
-
     var $album = $($target).closest(".album")
+    album_to_playlist($album, playlist_id)
+})
+
+function album_to_playlist($album, playlist_id){
+
     var artist_name = $($album).data("artist")
     var artist_id = $($album).data("artist-id")
     var title = $($album).data("album-title")
@@ -384,9 +391,42 @@ $(document).on('click', ".album-to-playlist", function(e){
         alert("album was added to playlist")
     })
 
+}
 
 
-})
+
+
+
+  var frm = $('#save_to_playlist');
+    frm.submit(function () {
+        $.ajax({
+            type: frm.attr('method'),
+            url: frm.attr('action'),
+            data: frm.serialize(),
+            success: function (data) {
+                playlist_id = data['playlist_id'];
+                $entries = $("ul.tracks li");
+                for(var i=0; i<$entries.length; i++){
+                    if($($entries[i]).hasClass("track")){
+                        console.log("track found in tracks");
+                        track_to_playlist($entries[i], playlist_id)
+                    }
+                    if($($entries[i]).hasClass("release")){
+                        console.log("release found")
+                        album_to_playlist($entries[i], playlist_id)
+                    }
+
+                }
+
+            },
+            error: function(data) {
+                // $("#MESSAGE-DIV").html("Something went wrong!");
+            }
+        });
+        return false;
+    });
+
+
 //     // var $target = $(e.target)
 //     // var playlist_id = $($target).data("playlist-id")
 //     // var album_title
@@ -920,6 +960,31 @@ function hacked_album_art(){
 loadArt();
 
 
+function check_spotify_track(artist, title){
+    var artist = htmlEncode(artist)
+    var title = htmlEncode(title)
+    var return_data = {}
+    var url = 'http://ws.spotify.com/search/1/track.json?q=artist:"'+artist+'"title:"'+title+'"'
+    console.log("url: ",url)
+    var json = $.getJSON(url,
+        function(data){
+            console.log(data)
+            return_data['data'] = data
+        })
+}
+
+
+
+function check_spotify_album(artist, title){
+    var artist = htmlEncode(artist)
+    var title = htmlEncode(title)
+    var url = 'http://ws.spotify.com/search/1/track.json?q=artist:"'+artist+'"album:"'+title+'"'
+    var json = $.getJSON(url,
+        function(data){
+            console.log(data) 
+        })
+    // console.log(json)
+}
 
 
 
@@ -1056,7 +1121,10 @@ function text_to_albums(text, destination){
 }
 
 function create_album(artist, title){
-    var release_li = '<li class = "release" style="list-style-type: none;">\
+    var release_li = '<li class = "release" style="list-style-type: none;"\
+    data-artist = "'+artist+'"\
+    data-album-title = "'+title+'"\
+    >\
     <div class="media album stream-item release" \
     data-artist = "'+artist+'"\
     data-album-title = "'+title+'"\

@@ -476,6 +476,7 @@ def playlist_view(request, playlist_id):
 			entry_id = pl_entry.pk
 			track = {'title':entry.title, 'type': 'text', 'entry_id':entry_id}
 			if entry.mbid:
+				print "entry has an mbid"
 				track_id = entry.mbid
 				feast_id = entry.pk
 				artist_name = entry.artists.all()[0].name
@@ -484,6 +485,7 @@ def playlist_view(request, playlist_id):
 				print "this is the playlistview processed track" 
 				print track
 			elif entry.artist_name:
+				print "entry has no mbid"
 				artist_name = entry.artist_name
 				track.update({"artist":artist_name})
 			tracks.append(track)
@@ -493,6 +495,7 @@ def playlist_view(request, playlist_id):
 			entry_id = pl_entry.pk
 			album = {'title': entry.title, 'entry_id':entry_id}
 			if entry.reid:
+				print "entry has reid"
 				release_id = entry.reid
 				feast_id = entry.pk
 				artist_name = entry.artists.all()[0].name
@@ -503,9 +506,12 @@ def playlist_view(request, playlist_id):
 				album['feast_id'] = feast_id
 
 
-			elif track['artist_name']:
+			# elif track['artist_name']:
+			elif entry.artist_name:
+				print 	"entry has no mbid"
 				artist_name = entry.artist_name
-				album['artist_name'] = artist_name
+				print "artist name: ", artist_name
+				album['artist'] = artist_name
 			albums.append(album)
 		this_playlist = {"name":playlist.name,'description':playlist.description, 'pk':playlist.pk}
 	if albums or tracks:
@@ -517,7 +523,16 @@ def playlist_view(request, playlist_id):
 from django.shortcuts import render
 from django.http import HttpResponseRedirect
 
-def create_playlist(request):
+
+
+# def create_playlist_redirect(request):
+# 	create_playlist(request, redirect=True)
+
+def create_playlist_no_redirect(request):
+	response = create_playlist(request, redirect=False)
+	return response
+
+def create_playlist(request, redirect=True):
 	if request.user.is_authenticated():
 		if request.method == 'POST': 
 			form = PlaylistForm(request.POST) 
@@ -531,9 +546,18 @@ def create_playlist(request):
 				print user_profile.user.username
 				playlist.users.add(user_profile)
 				playlist.save()
-
-
-		        return HttpResponseRedirect('/playlist/'+str(pk)) 
+				print "playlist created, playlist id:", pk
+				print "redirect: ", redirect
+				if redirect:
+					return HttpResponseRedirect('/playlist/'+str(pk)) 
+				elif not redirect:
+					print "not redirecting"
+					results = {'playlist_id':pk}
+					return_json = simplejson.dumps(results)
+					return HttpResponse(return_json, content_type='application/json')
+					# return HttpResponse("success")
+			else:
+				print "form is not valid"
 		else:
 			form = PlaylistForm()
 
@@ -565,7 +589,9 @@ def my_playlists(request):
 		# return HttpResponse("You need to be logged in to have playlists")
 		return render_to_response('scrapers/message.html', {'message': "You need to be logged in to have playlists" }, context_instance=RequestContext(request))
 
-
+def text_to_tracks(request):
+	form = PlaylistForm()
+	return render_to_response('scrapers/text_to_tracks.html', {'page':"text_to_tracks", 'form':form}, context_instance=RequestContext(request))
 
 
 

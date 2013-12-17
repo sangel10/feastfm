@@ -1,0 +1,26 @@
+<li class = 'artist' >
+    <!-- <img width="150" height="150" src="http://ws.audioscrobbler.com/2.0/?method=artist.imageredirect&amp;mbid={{artist.artist_id}}&amp;autocorrect=1&amp;size=largesquare&amp;api_key=c43db4e93f7608bb10d96fa5f69a74a1"> -->
+    <img width="150" height="150" src="http://ws.audioscrobbler.com/2.0/?method=artist.imageredirect&amp;artist={{artist.name|escape}}&amp;autocorrect=1&amp;size=largesquare&amp;api_key=c43db4e93f7608bb10d96fa5f69a74a1">
+    <div>
+    <a href = "/artist/{{artist.artist_id}}">  {{ artist.name }}</a>
+
+    {%if artist.disambiguation%}
+        <span>({{artist.disambiguation}})</span
+    {%endif%}
+
+    <span >
+        <!-- <button type="button" 
+        data-artist-id = "{{ artist.artist_id }}" 
+        class ="follow-artist">
+            {{artist.following_artist}}
+        </button> -->
+
+        <button type = "button" 
+        class = "btn btn-default follow-artist" 
+        data-artist-id = "{{ artist.artist_id }}" 
+        data-following-artist = "{{artist.following_artist}}">
+        {{artist.following_artist}}
+    </button>
+    </span>
+</div>
+</li>

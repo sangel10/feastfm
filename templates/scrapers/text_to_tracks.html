@@ -7,6 +7,7 @@
 
 <h3>Search for entire lists of tracks or albums at once</h3>
 <h4>Enter tracks or albums separated by line and formatted as: artist - title</h4>
+<h5>** Please note, this is an experimental feature and may show false results or show that you are following tracks you are not. You may not be able to follow or add songs to playlists- please don't be alarmed, everything will be ok...eventaully**</h5>
 <!-- <form action = "#" id="usrform"> -->
   <textarea style = "width:100%; height:60%; " name="list_of_tracks" id= "text-tracks" placeholder = ""></textarea>
 	
@@ -14,11 +15,26 @@
 		<br>
   <button type="button" id = "submit-text-tracks" > Convert to Tracks</button>
   <button type="button" id = "submit-text-albums" > Convert to Albums</button>
+<br>
+<br>
+
+      <!--   {% csrf_token %} -->
+       <!--  <label for="pl_name">Name</label>
+        <input type="text" id = "pl_name" name = "query" placeholder = "">
+        <button id = "save_as_pl" value="Save as Playlist">Save as Playlist</button> -->
+
+        <form id = "save_to_playlist" action="/create_playlist_no_redirect/" method="post">{% csrf_token %}
+		<label for="id_name">Name:</label>
+		{{ form.name }}
+		<input type="submit" value="Save as Playlist" />
+		</form>
+
 
 <!-- </form> -->
 
 </div>
-
+<br>
+<br>
 
 <!-- <textarea>
 	test
