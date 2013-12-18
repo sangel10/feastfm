@@ -960,32 +960,64 @@ function hacked_album_art(){
 loadArt();
 
 
-function check_spotify_track(artist, title){
-    var artist = htmlEncode(artist)
-    var title = htmlEncode(title)
-    var return_data = {}
+function check_spotify_track(artist, title, callback, destination){
+    console.log("check spotify track ran ")
+    // var artist = htmlEncode(artist)
+    var artist = encodeURIComponent(artist)
+    // var title = htmlEncode(title)
+    var title =encodeURIComponent(title)
     var url = 'http://ws.spotify.com/search/1/track.json?q=artist:"'+artist+'"title:"'+title+'"'
     console.log("url: ",url)
-    var json = $.getJSON(url,
+    $.getJSON(url,
         function(data){
             console.log(data)
-            return_data['data'] = data
+            append_spotify_track_found(destination, data)
         })
 }
 
+function append_spotify_track_found(destination, data){
+    if (data && data['tracks'].length >0){
+        console.log("append_spotify_track_found ran, data: ", data)
+        var title = data['tracks'][0]['name']
+        var artist = data['tracks'][0]['artists'][0]['name']
+        var spotify_id = data['tracks'][0]['href']
+        console.log("track found", artist, " - ", title, " - ", spotify_id)
+        artist_and_title = artist + " - "+title
+        $(destination).prepend("<span data-artist ='"+artist+"' data-title ='"+title+"' class='glyphicon glyphicon-ok\
+         spotify-track' title = '"+artist+" - "+title+"' style = 'color:green;'></span>")
+        }
+    else{
+        console.log("track not found")
+        $(destination).prepend("<span class='glyphicon glyphicon-remove-sign red'></span>")
+    }
+}
 
-
-function check_spotify_album(artist, title){
+function check_spotify_album(artist, title, callback, destination){
+    
     var artist = htmlEncode(artist)
     var title = htmlEncode(title)
     var url = 'http://ws.spotify.com/search/1/track.json?q=artist:"'+artist+'"album:"'+title+'"'
     var json = $.getJSON(url,
         function(data){
             console.log(data) 
+            callback(div, data)
         })
     // console.log(json)
 }
 
+
+
+function append_spotify_album_found(destination, data){
+    if (data['albums'].length >0){
+        var title = data['albums'][0]['name']
+        var artist = data['albums'][0]['artists'][0][name]
+        var spotify_id = data['albums'][0]['href']
+        $(destination).prepend("<span>*</span>")
+    }
+    else{
+        $(destination).prepend("<span>!!!</span>")
+    }
+}
 
 
 $(document).on('click', "#submit-text-tracks", function(e){
@@ -1034,7 +1066,6 @@ function text_to_tracks(text, destination){
             console.log(" no  ' - ' or  '-' found")
             continue
         }
-
     }
 
     console.log(tracks)
@@ -1050,6 +1081,8 @@ function text_to_tracks(text, destination){
        for (j=0; j<sounds.length; j++){
         var $li = create_album_track(sounds[j]['artist'], sounds[j]['title'], "", sounds[j]['following_sound'])
         console.log($li)
+
+        check_spotify_track(sounds[j]['artist'], sounds[j]['title'], append_spotify_track_found(), $li)
         destination.append($li)
        }
     })   
@@ -1309,6 +1342,10 @@ $('#play-pause').click(function(){
 
 $('#play-next').click(function(){
     // play_pause()
+    if (playerTimeout){
+            clearTimeout(playerTimeout);
+
+        }
     playNext(currentTrack, "track");
 })
 
