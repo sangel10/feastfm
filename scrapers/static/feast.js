@@ -994,28 +994,34 @@ function append_spotify_track_found(destination, data){
 
 function check_spotify_album(artist, title, callback, destination){
     
-    var artist = htmlEncode(artist)
-    var title = htmlEncode(title)
-    var url = 'http://ws.spotify.com/search/1/track.json?q=artist:"'+artist+'"album:"'+title+'"'
+    var artist = encodeURIComponent(artist)
+    var title =encodeURIComponent(title)
+    var url = 'http://ws.spotify.com/search/1/album.json?q=artist:"'+artist+'"album:"'+title+'"'
     var json = $.getJSON(url,
         function(data){
             console.log(data) 
-            callback(div, data)
+            // callback(div, data)
+            append_spotify_album_found(destination, data)
         })
     // console.log(json)
 }
 
 
-
 function append_spotify_album_found(destination, data){
     if (data['albums'].length >0){
+        console.log("append_spotify_track_found ran, data: ", data)
         var title = data['albums'][0]['name']
-        var artist = data['albums'][0]['artists'][0][name]
+        var artist = data['albums'][0]['artists'][0]['name']
         var spotify_id = data['albums'][0]['href']
-        $(destination).prepend("<span>*</span>")
-    }
+        console.log("album found", artist, " - ", title, " - ", spotify_id)
+        artist_and_title = artist + " - "+title
+
+        $(destination).prepend("<span data-artist ='"+artist+"' data-title ='"+title+"' class='glyphicon glyphicon-ok\
+         spotify-track' title = '"+artist+" - "+title+"' style = 'color:green;'></span>")
+        }
     else{
-        $(destination).prepend("<span>!!!</span>")
+        console.log("album not found")
+        $(destination).prepend("<span class='glyphicon glyphicon-remove-sign red'></span>")
     }
 }
 
@@ -1148,6 +1154,7 @@ function text_to_albums(text, destination){
        var sounds  = tracks
        for (j=0; j<sounds.length; j++){
         var $li = create_album(sounds[j]['artist'], sounds[j]['title'])
+        check_spotify_album(sounds[j]['artist'], sounds[j]['title'], append_spotify_album_found, $li)
         // console.log($li)
         destination.append($li)
        }
