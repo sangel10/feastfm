@@ -1,27 +1,6 @@
 $(document).ready(function(){
 
 
-// $(".noUiSlider").noUiSlider({
-//     range: [0, 100],
-//     start: 0,
-//     step: 1,
-//     handles: 1,
-//     slide: function(){
-//       var value = $(this).val();
-//       console.log(value);
-//       // track.seek(value);
-//       seek(value);
-//    }
-// });
-
-
-// function seek(num){
-//     track.seek(num);
-
-// }
-// $("ul ul").click(function(this){
-// 	alert(this);
-// };
 
 
 var h=$(window).height();
@@ -50,25 +29,13 @@ $("#label-sort").click(function(){
 });
 
 $("#date-sort").click(function(){
-    // for (var i=0; i < $("span.date").length; i++){
-    //     var day = $("span.date")[i];
-    //     day_long = day.innerText;
-    //     var seconds = Date.parse(day_long);
-    //     //  console.log(seconds);
-    //     //doesn't work on single element, only on list, which seems wrong/sloppy
-    //     $(day).attr("data-seconds", seconds);
-    // }
-    // $(".stream-item").tsort("span.date", {data:'seconds', order:'desc'});
 
     sort_by_date();
 
-    //$(".stream-item").tsort("span.date", {order:'desc'});
-    //$(".stream-item").tsort(Date.parse($("ul.stream-item span.date").innerText));
 });
 
 $("#catalog-sort").click(function(){
-    //$('.stream-item').tsort('ul span.catalog-number');
-    //$('ul').tsort({data:'catalog-number'});
+
     $(".stream-item").tsort("div.catalog-number");
 });
 
@@ -89,8 +56,7 @@ sort_by_date();
 $.ajaxSetup({ 
 
     "error":function(XMLHttpRequest,textStatus, errorThrown) {   
-      // alert(textStatus);
-      // alert(errorThrown);
+
       alert(XMLHttpRequest.responseText);
   },
 
@@ -123,16 +89,10 @@ $.ajaxSetup({
 
 $('.follow-artist').click(function(e){
     var button = $(e.target)
-    // var $target = $(e.target).parent();
-    // var $target_parent = $($target).parent();
-    // console.log($target);
-    // console.log($target_parent);
-    // var artist_id = $($target).data('artist-id');
-    // var artist_name = $($target_parent).data('artist');
+
     var artist_id = $(button).data('artist-id');
     console.log('artist id: ' +artist_id);
-    // console.log("artist" +artist)
-    // console.log('artist name: '+artist_name);
+
     $release = $(button).closest('.release');
     console.log("this is the album element: "+$release)
     artist_name = $($release).data("artist")
@@ -154,28 +114,16 @@ $('.follow-artist').click(function(e){
         },
         })
 
-    // .then(
-    //         function(){ alert(" follow succeeded"); 
-    //             },
-    //         function(){ alert(" follow failed!"); 
-    //             }
-    //     );
-
 })
 
 
 $('.follow-label').click(function(e){
     var button = $(e.target)
-    // var $target = $(e.target).parent();
-    // var $target_parent = $($target).parent();
-    // console.log($target);
-    // console.log($target_parent);
+
     var label_id = $(button).data('label-id');
     var label_name = $(button).data('label-name');
     console.log(label_id)
-    //var artist_name = $($target_parent).data('artist');
-    // console.log('artist id: ' +artist_id);
-    // console.log('artist name: '+artist_name);
+
     data = {'type':'label', 'label_id':label_id, 'label_name':label_name};
     $.ajax({
         type: "POST",
@@ -198,18 +146,13 @@ $('.follow-label').click(function(e){
 
 $('.love-album').click(function(e){
     var button = $(e.target)
-    // var $target = $(e.target).parent();
-    // var $target_parent = $($target).parent();
-    // console.log($target);
-    // console.log($target_parent);
+
     var reid = $(button).data('reid');
     var artist = $(button).data('artist');
     var title = $(button).data('album-title');
     
     console.log(reid)
-    //var artist_name = $($target_parent).data('artist');
-    // console.log('artist id: ' +artist_id);
-    // console.log('artist name: '+artist_name);
+
     data = {'type':'album', 'reid':reid, 'artist':artist, 'title':title};
     $.ajax({
         type: "POST",
@@ -273,8 +216,7 @@ function addPopover(e, add_class){
 
 
     if ($($target).next(".popover").length>0){
-        // $(".add-album").next(".popover").toggle()
-        // $($target).popover("toggle")
+
         $($target).next(".popover").toggle()
         // $($target).popover("destroy")
         console.log("popover exists");
@@ -314,9 +256,7 @@ function addPopover(e, add_class){
             }
             var $h5 = $("<h5>")
             $h5.append($div)
-            // $('body').popover({
-            //         selector: '[rel=popover]'
-            // })
+
             console.log('$div: ', $div)
             console.log("$target: ", $target)
             $target.popover(
@@ -427,66 +367,6 @@ function album_to_playlist($album, playlist_id){
     });
 
 
-//     // var $target = $(e.target)
-//     // var playlist_id = $($target).data("playlist-id")
-//     // var album_title
-//     // var artist
-//     // var artist_id
-//     // var album_id  =
-
-
-
-    // call back end to get user playlists
-
-    // write 'content'
-    // generate popover, include content
-
-
-    // var $target = $(e.target)
-
-
-    // toggle popover
-
-    // $(".glyphicon-plus").popover({placement:'bottom', 
-    //     html:true, 
-    //     content: "<a href = '/create_playlist'>Create New Playlist</a><span><a class = btn btn-default>Add</a></span>"})
-
-
-
-// $(document).on('click', ".like-track", function(e) {
-// // $('.like-track').click(function(e){
-//     var button = $(e.target)
-//     console.log("like button clicked");
-//     // var $target = $(e.target).parent();
-//     // var $target_parent = $($target).parent();
-//     // console.log($target);
-//     // console.log($target_parent);
-//     var track_id = $(button).data('track-id');
-//     // console.log(label_id)
-//     //var artist_name = $($target_parent).data('artist');
-//     // console.log('artist id: ' +artist_id);
-//     // console.log('artist name: '+artist_name);
-//     data = {'type':'track', 'track_id':track_id,};
-//     $.ajax({
-//         type: "POST",
-//         url: "/follow_toggle/",
-//         data: data,
-//         success: function(){
-//             //alert("it worked");
-//             console.log( button);
-//             if ($(button).text() != "Like"){
-//                 $(button).text("Like");
-//             }
-//             else{
-//                 $(button).text("You Like This");
-//             }
-//         },
-//         })
-
-// })
-
-
-
 $(document).on('click', ".delete-playlist", function(e){
     var $target = $(e.target)
     var $playlist = $target.closest(".playlist")
@@ -561,10 +441,7 @@ $(document).on('click', ".love-track", function(e) {
     // $track = $(button).closest("[data-track-id]")
     $track = $(button).closest(".track")
     console.log("love track button clicked");
-    // var $target = $(e.target).parent();
-    // var $target_parent = $($target).parent();
-    // console.log($target);
-    // console.log($target_parent);
+
     var track_id = $($track).data('track-id');
     if (!track_id || typeof track_id !== 'undefined' || attr !== false) {
         track_id = ""
@@ -575,10 +452,7 @@ $(document).on('click', ".love-track", function(e) {
         artist_id = ""
     }
     var title = $($track).data('title');
-    // console.log(label_id)
-    //var artist_name = $($target_parent).data('artist');
-    // console.log('artist id: ' +artist_id);
-    // console.log('artist name: '+artist_name);
+
     data = {'type':'track', 'track_id':track_id, 'artist':artist, 'artist_id':artist_id, 'title':title};
     $.ajax({
         type: "POST",
@@ -775,83 +649,6 @@ function play_album($album){
 
 
 
-// function FollowButtons(){
-//     var f_artists = $("[data-following-artist = Following]")
-//     for (var i; i<f_artists.length; i+=1){
-//         $(f_artists[i]).removeClass("btn-default")
-//         $(f_artists[i]).addClass("btn-primary")
-//     }
-// }
-
-// FollowButtons();
-
-// $('.album').click(function(e){
-//     console.log("album clicked")
-//     //alert("album clicked")
-// 	var $target = $(e.target).parent();
-//     console.log($target);
-//     if(!$target.is("ul"))
-//     //if(!$target.is("div")) //magic happens here!!
-//         {
-//             console.log("target is not ul");
-//             return;
-//         }
-// 	if($(this).children("li").length >= 1){
-// 		$(this).children("li").toggle();
-// 	}
-// 	else{
-//         var reid = $($target).data('reid');
-// 	    //var reid = $(this).data('reid');
-//         if (reid !== undefined){
-//             console.log("reid: "+reid)
-//     	    ul = this;
-//     	    var data = {"reid": reid};
-//     	    // var args = { type:"GET", url:"/album/", data:data, complete:done };
-//     	    // $.ajax(args);
-//     	    $.getJSON("/album_ajax/", data, function(json){
-//                 console.log("calling getJSON")
-//         	    if(json['tracks']){
-//         	    	//alert("json?: " + json["tracks"]+" reid: "+json['reid']);
-//         	    	// var album = $('data-reid ='+)
-//         	    	for(var i=0; i<json['tracks'].length; i++){
-//         	    		//console.log(json['tracks'][i]['title'])
-//         	    		var artist = json['tracks'][i]['artist']
-//         	    		var title = json['tracks'][i]['title']
-//                         var track_id = json['tracks'][i]['track_id']
-//                         var following = json['tracks'][i]['following_sound']
-//         	    		$(ul).append("<li class = 'album-track track' data-artist = '"+escape(artist) +"' data-title ='" + escape(title) +"' data-track-id = '"+track_id+"'>"+artist +" - "+ title+"<button type='button' class = 'like-track' data-track-id = '"+track_id+"'>"+following+"</button></li>");
-//         	    	}
-//                 }
-//     		else{
-//     			alert('no results')
-//     		}
-
-// 		})
-//     }
-// 	}
-// });
-
-// $(document).on('click', ".album-track", function(e) {
-// 	// var artist = $(this).data('artist');
-// 	// var title = $(this).data('title');
-//  //    artist = unescape(artist);
-//  //    title = unescape(title);
-// 	// alert(artist + " - "+title);
-// 	// renderTrack(artist, title);
-
-//     var $target = $(e.target)
-//     var track = $(e).closest(".album-track")
-//     if(!$target.is("li"))
-//         {
-//             console.log("target is not li");
-//             return;
-//         }
-// 	play(this);
-// 	// alert("you clicked a track");
-// });
-
-
-
 $(document).on('click', ".play-track", function(e) {
     // var artist = $(this).data('artist');
     // var title = $(this).data('title');
@@ -866,20 +663,6 @@ $(document).on('click', ".play-track", function(e) {
     // alert("you clicked a track");
 });
 
-
-// $(document).on('click', ".track", function(e) {
-//     // var artist = $(this).data('artist');
-//     // var title = $(this).data('title');
-//  //    artist = unescape(artist);
-//  //    title = unescape(title);
-//     // alert(artist + " - "+title);
-//     // renderTrack(artist, title);
-//     console.log("track clicked")
-//     var track = $(e.target)
-//     console.log(track)
-//     play(track);
-//     // alert("you clicked a track");
-// });
 
 function htmlEncode(value){
   //create a in-memory div, set it's inner text(which jQuery automatically encodes)
@@ -915,11 +698,7 @@ function get_album_art(release_id, callback){
      var images
      try{
         $.getJSON(url, function(data){
-        // console.log(url);
-        // console.log(data);
-        // console.log(release_id);
-
-            if ('album' in data){
+      if ('album' in data){
                 images = data['album']['image'];
 
             var sizes_by_rank = { 'mega' : 10, 'extralarge' : 1, 'large' : 0, 'medium' : 3, 'small': 4};
@@ -1258,24 +1037,15 @@ function play(element){
         }
 
         console.log("play called")
-        // ct = $("#current-track")
-        
-        // $(currentTrack).removeAttr("style")
-        // $("#current-track span.play-track").removeAttr("style")
-        // console.log("style removed")
-        
-        // $(currentTrack).find(".play-track").attr("class","glyphicon glyphicon-play play-track")
+
         $(currentTrack).find(".play-track").removeClass("red")
         $(currentTrack).removeAttr("id")
-        // $("#current-track span.play-track").attr("class","glyphicon glyphicon-play play-track")
         console.log("current track class reset")
 
 
 
     	currentTrack = element;
         $(element).attr("id", "current-track")
-        // $("#current-track span.play-track").attr("style","color:red")
-        // $("#current-track span.play-track").attr("class","glyphicon glyphicon-play play-track red")
         $("#current-track span.play-track").addClass("red")
 
 
